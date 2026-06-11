@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자산·원가기준 가치평가 — 기업 데이터룸 (mock)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            oc: {
+              bg: "#F4F6FA", surface: "#FFFFFF", s2: "#F7F9FC", s3: "#EEF2F8",
+              border: "#E4E8F0", "border-strong": "#C9D2E0",
+              fg: "#1A2741", muted: "#6B7894", faint: "#9AA6BF",
+              navy: "#002060", blue: "#1D4ED8", "blue-deep": "#054DBA", "blue-tint": "#DAE3F3",
+              cyan: "#31D6E6", "cyan-tint": "#DDF6F9",
+              success: "#138A5A", "success-tint": "#E6F4EE",
+              warn: "#B5780C", "warn-tint": "#FBEED0",
+              danger: "#B0382F", "danger-tint": "#FBEAE8",
+            },
+          },
+          fontFamily: {
+            body: ['"Pretendard Variable"', "Pretendard", "-apple-system", "BlinkMacSystemFont", '"Apple SD Gothic Neo"', "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="m-0 bg-oc-bg text-oc-fg font-body text-[14px] antialiased">
+
+<div id="nav-app" class="grid grid-rows-[52px_1fr] min-h-screen">
+
+  <!-- 상단 topbar -->
+  <header class="flex items-center justify-between px-[22px] bg-white border-b border-oc-border">
+    <div class="flex items-center gap-2 text-[13px]">
+      <span class="text-oc-faint">데이터룸</span>
+      <span class="text-oc-faint">/</span>
+      <span class="text-oc-muted font-bold">Korea Shipping Co.</span>
+      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-cyan-tint text-oc-blue-deep">기업 · Company</span>
+      <span class="text-oc-faint">/</span>
+      <strong class="text-oc-navy font-extrabold">가치평가 (자산·원가기준)</strong>
+    </div>
+    <label class="inline-flex items-center gap-1.5 text-[12px] text-oc-muted font-bold">
+      <input type="checkbox" class="accent-oc-blue" />
+      <span>투자사 공유</span>
+    </label>
+  </header>
+
+  <main class="overflow-y-auto px-8 pt-6 pb-16">
+
+    <!-- 섹션 헤더 -->
+    <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+      <div>
+        <h1 class="m-0 text-[22px] font-extrabold text-oc-navy">기업가치 (자산·원가기준)</h1>
+        <p class="mt-1 mb-0 text-[12.5px] text-oc-muted">자산·원가 접근법 · 보유 자산의 장부가치에서 부채를 차감한 순자산가치(NAV)</p>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <select id="in-sector" class="px-2.5 py-1.5 bg-white border border-oc-border rounded-md text-[12px] font-bold text-oc-navy">
+          <option value="ship">선박금융 (Ship Finance)</option>
+          <option value="realestate">부동산 (Real Estate)</option>
+          <option value="software">소프트웨어 (Software)</option>
+          <option value="poultry">양계장 (Poultry Farm)</option>
+        </select>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-s3 text-oc-muted">방법론 IWA</span>
+        <span id="conf-pill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-success-tint text-oc-success">
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+          <span id="conf-label">신뢰도 보통</span>
+        </span>
+        <button id="reset-btn" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-oc-border rounded-md text-oc-navy text-[12px] font-bold hover:bg-oc-s2 transition-colors">↺ LLM 제안값으로 초기화</button>
+      </div>
+    </div>
+
+    <!-- 자산 없음 배너 -->
+    <div id="miss-banner" class="hidden items-center gap-3 px-4 py-3 rounded-lg mb-4 text-[12.5px] bg-oc-warn-tint border border-yellow-200">
+      <span class="shrink-0 w-[22px] h-[22px] rounded-full inline-flex items-center justify-center font-extrabold text-[12px] text-white bg-oc-warn">!</span>
+      <div>
+        <strong class="block text-oc-navy mb-0.5">자산 항목이 없어 NAV를 산출할 수 없습니다.</strong>
+        <span class="text-oc-muted">아래 <b>+ 자산 추가</b> 버튼으로 보유 자산을 입력하세요.</span>
+      </div>
+    </div>
+
+    <!-- NAV 범위 카드 3개 -->
+    <div class="grid grid-cols-3 gap-3 mb-5">
+      <div class="bg-white border border-oc-border rounded-xl p-4">
+        <div class="text-[9.5px] font-extrabold tracking-[0.06em] uppercase text-oc-faint mb-1.5">보수적 (Low)</div>
+        <div class="text-[26px] font-extrabold text-oc-navy tabular-nums leading-tight">
+          <span id="nav-low">—</span><span class="text-[13px] font-bold text-oc-muted ml-1">억원</span>
+        </div>
+        <div class="text-[10.5px] text-oc-muted mt-1.5">청산가치 · 즉시 처분 가정</div>
+      </div>
+      <div class="bg-gradient-to-br from-oc-blue-tint to-white border border-oc-blue-tint rounded-xl p-4">
+        <div class="text-[9.5px] font-extrabold tracking-[0.06em] uppercase text-oc-faint mb-1.5">기준 (Base) · NAV</div>
+        <div class="text-[30px] font-extrabold text-oc-navy tabular-nums leading-tight">
+          <span id="nav-base">—</span><span class="text-[13px] font-bold text-oc-muted ml-1">억원</span>
+        </div>
+        <div class="text-[10.5px] text-oc-muted mt-1.5">장부가치(취득원가−감가상각) − 부채</div>
+      </div>
+      <div class="bg-white border border-oc-border rounded-xl p-4">
+        <div class="text-[9.5px] font-extrabold tracking-[0.06em] uppercase text-oc-faint mb-1.5">낙관적 (High)</div>
+        <div class="text-[26px] font-extrabold text-oc-navy tabular-nums leading-tight">
+          <span id="nav-high">—</span><span class="text-[13px] font-bold text-oc-muted ml-1">억원</span>
+        </div>
+        <div class="text-[10.5px] text-oc-muted mt-1.5">재조달원가 · 현재 재취득 가정</div>
+      </div>
+    </div>
+
+    <!-- 2단 레이아웃 -->
+    <div class="grid grid-cols-[300px_1fr] gap-5 items-start">
+
+      <!-- 가정 패널 -->
+      <section class="bg-white border border-oc-border rounded-xl sticky top-4">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-oc-border">
+          <h3 class="m-0 text-[13px] font-extrabold text-oc-navy">가정 (Assumptions)</h3>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-cyan-tint text-oc-blue-deep">LLM 제안</span>
+        </div>
+
+        <!-- 청산계수 -->
+        <div data-key="liq" class="px-4 py-3.5 border-b border-oc-border">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="in-liq" class="text-[12.5px] font-bold text-oc-navy">청산계수 (Low 기준)</label>
+            <span id="hint-liq" class="text-[10px] text-oc-faint font-semibold">LLM 제안 80%</span>
+          </div>
+          <div class="flex items-center gap-3 my-2">
+            <input type="range" id="in-liq" min="40" max="100" step="5" value="80" class="flex-1 accent-oc-blue" />
+            <output id="out-liq" class="min-w-[48px] text-right text-[14px] font-extrabold text-oc-blue-deep tabular-nums">80%</output>
+          </div>
+          <p class="m-0 text-[10.5px] text-oc-muted leading-relaxed">즉시 처분 시 장부가치 대비 회수 비율. 선박 시황·유동성 반영</p>
+        </div>
+
+        <!-- 재조달원가 배수 -->
+        <div data-key="rep" class="px-4 py-3.5 border-b border-oc-border">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="in-rep" class="text-[12.5px] font-bold text-oc-navy">재조달원가 배수 (High 기준)</label>
+            <span id="hint-rep" class="text-[10px] text-oc-faint font-semibold">LLM 제안 130%</span>
+          </div>
+          <div class="flex items-center gap-3 my-2">
+            <input type="range" id="in-rep" min="80" max="200" step="5" value="130" class="flex-1 accent-oc-blue" />
+            <output id="out-rep" class="min-w-[48px] text-right text-[14px] font-extrabold text-oc-blue-deep tabular-nums">130%</output>
+          </div>
+          <p class="m-0 text-[10.5px] text-oc-muted leading-relaxed">현재 시점 동급 자산 재취득 비용의 취득원가 대비 배수</p>
+        </div>
+
+        <!-- 총부채 -->
+        <div data-key="debt" class="px-4 py-3.5 border-b border-oc-border">
+          <div class="flex items-baseline justify-between mb-1">
+            <label for="in-debt" class="text-[12.5px] font-bold text-oc-navy">총부채</label>
+            <span id="hint-debt" class="text-[10px] text-oc-faint font-semibold">LLM 제안 40억</span>
+          </div>
+          <div class="flex items-center gap-3 my-2">
+            <input type="range" id="in-debt" min="0" max="200" step="5" value="40" class="flex-1 accent-oc-blue" />
+            <output id="out-debt" class="min-w-[64px] text-right text-[14px] font-extrabold text-oc-blue-deep tabular-nums">40억원</output>
+          </div>
+          <p class="m-0 text-[10.5px] text-oc-muted leading-relaxed">선박담보대출·리스부채 합계. NAV 산출 시 차감</p>
+        </div>
+
+        <div id="ul-footer" class="px-4 py-3 text-[10.5px] text-oc-faint leading-relaxed">
+          <strong class="text-oc-muted">섹터별 기본 내용연수</strong><br>
+          선박금융: 선박 20년 · 기자재 10년<br>
+          부동산: 건물 40년 · 토지 감가상각 없음 · 시설물 15년
+        </div>
+      </section>
+
+      <!-- 오른쪽 패널 -->
+      <section>
+        <!-- 자산 테이블 -->
+        <div class="bg-white border border-oc-border rounded-xl overflow-hidden mb-4">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-oc-border">
+            <h3 class="m-0 text-[13px] font-extrabold text-oc-navy">보유 자산 목록</h3>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-s3 text-oc-muted">단위 억원</span>
+              <button id="add-btn" class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-oc-blue text-white rounded-md text-[11.5px] font-bold hover:bg-oc-blue-deep transition-colors">+ 자산 추가</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full border-separate border-spacing-0 text-[12.5px]">
+              <thead>
+                <tr class="[&>th]:text-[9.5px] [&>th]:font-extrabold [&>th]:tracking-[0.06em] [&>th]:uppercase [&>th]:text-oc-muted [&>th]:px-3.5 [&>th]:py-2 [&>th]:border-b [&>th]:border-oc-border [&>th]:bg-oc-s2 [&>th]:whitespace-nowrap">
+                  <th class="text-left">자산명</th>
+                  <th class="text-left">분류</th>
+                  <th class="text-right">취득원가</th>
+                  <th class="text-center">내용연수 / 경과</th>
+                  <th class="text-right">감가상각 누계</th>
+                  <th class="text-right">장부가치</th>
+                  <th class="text-left">출처</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbl-body"></tbody>
+              <tfoot id="tbl-foot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- NAV 산출 분해 -->
+        <div class="bg-white border border-oc-border rounded-xl p-4 mb-4">
+          <h3 class="m-0 mb-3 text-[13px] font-extrabold text-oc-navy">NAV 산출 분해</h3>
+          <div class="grid grid-cols-[1fr_auto] gap-x-8 gap-y-1.5 text-[12.5px]">
+            <span class="text-oc-fg">총 취득원가 (Gross Asset Value)</span>
+            <span id="d-cost" class="text-right tabular-nums font-bold text-oc-navy">—</span>
+            <span class="text-oc-muted pl-3">− 감가상각 누계</span>
+            <span id="d-depr" class="text-right tabular-nums text-oc-muted">—</span>
+            <div class="col-span-2 border-t border-oc-border my-1"></div>
+            <span class="font-bold text-oc-fg">= 자산 순가치 (Net Asset)</span>
+            <span id="d-book" class="text-right tabular-nums font-bold text-oc-navy">—</span>
+            <span class="text-oc-muted pl-3">− 총부채</span>
+            <span id="d-debt" class="text-right tabular-nums text-oc-muted">—</span>
+            <div class="col-span-2 border-t border-oc-border my-1"></div>
+            <span class="font-extrabold text-oc-navy bg-oc-blue-tint -mx-2 px-2 py-1.5 rounded">= 순자산가치 NAV (Base)</span>
+            <span id="d-nav" class="text-right tabular-nums font-extrabold text-oc-navy bg-oc-blue-tint -mx-2 px-2 py-1.5 rounded">—</span>
+          </div>
+        </div>
+
+        <!-- 출처 -->
+        <div>
+          <h4 class="m-0 mb-2 text-[10px] font-extrabold tracking-[0.08em] uppercase text-oc-faint">출처</h4>
+          <ul class="list-none m-0 p-0 flex flex-col gap-1.5">
+            <li class="flex items-center gap-2.5 text-[11.5px] px-3 py-2 bg-white border border-oc-border rounded-lg">
+              <span class="font-bold text-oc-navy">📄 감정평가서_2024.pdf</span>
+              <span class="text-oc-muted ml-auto">p.3 자산 취득원가·평가금액</span>
+            </li>
+            <li class="flex items-center gap-2.5 text-[11.5px] px-3 py-2 bg-white border border-oc-border rounded-lg">
+              <span class="font-bold text-oc-navy">📄 재무제표_FY2025.xlsx</span>
+              <span class="text-oc-muted ml-auto">Sheet '유형자산' · 취득원가·감가상각 명세</span>
+            </li>
+            <li class="flex items-center gap-2.5 text-[11.5px] px-3 py-2 bg-white border border-oc-border rounded-lg">
+              <span class="font-bold text-oc-navy">📄 선박담보대출_계약서.pdf</span>
+              <span class="text-oc-muted ml-auto">부채 잔액 확인</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- 데모 버튼 -->
+    <div class="flex items-center gap-2 mt-6 pt-4 border-t border-dashed border-oc-border-strong text-[11px] text-oc-faint">
+      <span>mock 데모:</span>
+      <button id="demo-re" class="bg-white border border-oc-border px-2.5 py-1 rounded-full text-[11.5px] font-semibold text-oc-muted hover:text-oc-navy hover:border-oc-border-strong">부동산 시나리오 로드</button>
+      <button id="demo-clear" class="bg-white border border-oc-border px-2.5 py-1 rounded-full text-[11.5px] font-semibold text-oc-muted hover:text-oc-navy hover:border-oc-border-strong">자산 비우기</button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var DEFAULTS={liq:80,rep:130,debt:40,sector:'ship'};
+  var USEFUL_LIFE={
+    ship:{선박:20,기자재:10,기타유형:10},
+    realestate:{건물:40,토지:0,시설물:15,기타유형:10},
+    software:{소프트웨어:5,서버및인프라:5,특허및IP:10,사무용비품:5,기타유형:5},
+    poultry:{계사건물:20,토지:0,사육설비:10,냉동냉장설비:10,차량운반구:5,기타유형:5,산란계:2.5,종계:1.5,육계:0},
+  };
+  var CY=2025;
+  var SAMPLE_ASSETS={
+    ship:[
+      {id:1,name:'주력 선박 (1호)',cat:'선박',cost:100,acq:2019,land:false,src:'감정평가서_2024.pdf · p.3'},
+      {id:2,name:'보조 기자재',cat:'기자재',cost:18,acq:2021,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+      {id:3,name:'항만 부지',cat:'기타유형',cost:25,acq:2015,land:true,src:'등기부등본 · 취득가액'},
+    ],
+    realestate:[
+      {id:1,name:'강남 오피스 건물',cat:'건물',cost:200,acq:2010,land:false,src:'감정평가서_2024.pdf · p.3'},
+      {id:2,name:'부지 (토지)',cat:'토지',cost:80,acq:2010,land:true,src:'등기부등본 · 취득가액'},
+      {id:3,name:'주차장 시설물',cat:'시설물',cost:15,acq:2018,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+    ],
+    software:[
+      {id:1,name:'핵심 SaaS 플랫폼',cat:'소프트웨어',cost:30,acq:2021,land:false,src:'무형자산명세서_FY2025.xlsx'},
+      {id:2,name:'서버·클라우드 인프라',cat:'서버및인프라',cost:12,acq:2022,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+      {id:3,name:'특허 3건',cat:'특허및IP',cost:8,acq:2020,land:false,src:'특허등록원부 · 취득가액'},
+      {id:4,name:'사무용 비품',cat:'사무용비품',cost:3,acq:2023,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+    ],
+    poultry:[
+      {id:1,name:'계사 건물 (3동)',cat:'계사건물',cost:25,acq:2015,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+      {id:2,name:'농장 부지',cat:'토지',cost:20,acq:2015,land:true,src:'등기부등본 · 취득가액'},
+      {id:3,name:'자동 사육설비',cat:'사육설비',cost:18,acq:2018,land:false,src:'설비도입계약서_2018.pdf'},
+      {id:4,name:'냉동·냉장 창고',cat:'냉동냉장설비',cost:10,acq:2020,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+      {id:5,name:'냉장 운반 차량',cat:'차량운반구',cost:5,acq:2022,land:false,src:'차량등록증 · 취득가액'},
+      {id:6,name:'산란계 (15,000수)',cat:'산란계',cost:4.5,acq:2024,land:false,bio:true,src:'생물자산명세서_FY2025.xlsx · 산란계'},
+      {id:7,name:'종계 (2,000수)',cat:'종계',cost:2.0,acq:2025,land:false,bio:true,src:'생물자산명세서_FY2025.xlsx · 종계'},
+      {id:8,name:'육계 (30,000수)',cat:'육계',cost:3.0,acq:2025,land:false,bio:true,fair:true,src:'생물자산명세서_FY2025.xlsx · 육계'},
+    ],
+  };
+  var assets=SAMPLE_ASSETS.ship.map(function(a){return Object.assign({},a);});
+  var nextId=4;
+
+  function fmt(x){
+    if(x===null||x===undefined||isNaN(x))return'—';
+    return x.toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
+  }
+  function getUL(cat,sector,land){
+    if(land)return 0;
+    var m=USEFUL_LIFE[sector]||USEFUL_LIFE.ship;
+    return m[cat]||10;
+  }
+  function calcDepr(a,sector){
+    if(a.land)return 0;
+    if(a.bio && a.fair)return 0; // 육계: 공정가치 기준 — 감가상각 없음
+    if(a.bio){
+      var ul=getUL(a.cat,sector,a.land);
+      if(!ul)return 0;
+      var elapsed=(CY-a.acq)+(new Date().getMonth()/12); // 월 단위 반영
+      return Math.min(a.cost, a.cost*(elapsed/ul));
+    }
+    var ul=getUL(a.cat,sector,a.land);
+    if(!ul)return 0;
+    return Math.min(a.cost,a.cost*((CY-a.acq)/ul));
+  }
+  function calcBook(a,sector){return Math.max(0,a.cost-calcDepr(a,sector));}
+
+  function params(){
+    return{
+      sector:document.getElementById('in-sector').value,
+      liq:parseFloat(document.getElementById('in-liq').value),
+      rep:parseFloat(document.getElementById('in-rep').value),
+      debt:parseFloat(document.getElementById('in-debt').value),
+    };
+  }
+
+  function render(){
+    var p=params();
+
+    document.getElementById('out-liq').textContent=p.liq.toFixed(0)+'%';
+    document.getElementById('out-rep').textContent=p.rep.toFixed(0)+'%';
+    document.getElementById('out-debt').textContent=fmt(p.debt)+'억원';
+
+    var keys={liq:DEFAULTS.liq,rep:DEFAULTS.rep,debt:DEFAULTS.debt};
+    Object.keys(keys).forEach(function(k){
+      var changed=(p[k]!==keys[k]);
+      var out=document.getElementById('out-'+k);
+      var hint=document.getElementById('hint-'+k);
+      out.style.color=changed?'#B5780C':'#054DBA';
+      if(hint)hint.style.color=changed?'#B5780C':'';
+    });
+
+    var banner=document.getElementById('miss-banner');
+    if(assets.length===0){
+      banner.style.display='flex';
+      ['nav-low','nav-base','nav-high'].forEach(function(id){document.getElementById(id).textContent='—';});
+      document.getElementById('tbl-body').innerHTML='<tr><td colspan="8" style="padding:24px;text-align:center;color:#9AA6BF;font-size:12px;">자산 항목이 없습니다. + 자산 추가 버튼으로 입력하세요.</td></tr>';
+      document.getElementById('tbl-foot').innerHTML='';
+      ['d-cost','d-depr','d-book','d-debt','d-nav'].forEach(function(id){document.getElementById(id).textContent='—';});
+      return;
+    }
+    banner.style.display='none';
+
+    var tCost=0,tDepr=0,tBook=0,tRepl=0;
+    var TD='padding:8px 14px;border-bottom:1px solid #E4E8F0;font-size:12.5px;';
+    var TDR=TD+'text-align:right;font-variant-numeric:tabular-nums;';
+
+    var rows=assets.map(function(a){
+      var d=calcDepr(a,p.sector);
+      var bv=calcBook(a,p.sector);
+      var repl=a.land?a.cost:a.cost*(p.rep/100);
+      tCost+=a.cost;tDepr+=d;tBook+=bv;tRepl+=repl;
+      var ul=getUL(a.cat,p.sector,a.land);
+      // 내용연수 표시
+      var ulStr;
+      if(a.land) ulStr='감가상각 없음';
+      else if(a.bio && a.fair) ulStr='<span style="color:#1D4ED8;font-size:10.5px;">공정가치(시장가) 기준</span>';
+      else if(a.bio) ulStr='생물자산 '+ul+'년 / '+Math.round((CY-a.acq))+'년 경과';
+      else ulStr=ul+'년 / '+(CY-a.acq)+'년 경과';
+      // 감가상각 표시
+      var deprStr;
+      if(a.land) deprStr='<span style="color:#9AA6BF;font-size:11px;">없음</span>';
+      else if(a.bio && a.fair) deprStr='<span style="color:#138A5A;font-size:10.5px;">—</span>';
+      else deprStr=fmt(d);
+      // 자산명에 생물자산 배지
+      var nameBadge=a.bio?'<span style="font-size:9.5px;background:#E6F4EE;color:#138A5A;padding:1px 5px;border-radius:10px;margin-left:4px;font-weight:600;">'+(a.fair?'공정가치':'생물자산')+'</span>':'';
+      return'<tr>'+
+        '<td style="'+TD+'font-weight:600;">'+a.name+nameBadge+'</td>'+
+        '<td style="'+TD+'color:#6B7894;">'+a.cat+'</td>'+
+        '<td style="'+TDR+'">'+fmt(a.cost)+'</td>'+
+        '<td style="'+TD+'color:#6B7894;font-size:11px;white-space:nowrap;">'+ulStr+'</td>'+
+        '<td style="'+TDR+'color:#6B7894;">'+deprStr+'</td>'+
+        '<td style="'+TDR+(bv<=0?'color:#B0382F;':' font-weight:600;')+'">'+fmt(bv)+'</td>'+
+        '<td style="'+TD+'font-size:11px;color:#1D4ED8;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+a.src+'">'+a.src+'</td>'+
+        '<td style="'+TD+'text-align:center;"><button onclick="removeAsset('+a.id+')" style="background:none;border:none;cursor:pointer;color:#9AA6BF;font-size:13px;padding:2px 6px;border-radius:4px;" onmouseover="this.style.color=\'#B0382F\'" onmouseout="this.style.color=\'#9AA6BF\'">✕</button></td>'+
+        '</tr>';
+    });
+    document.getElementById('tbl-body').innerHTML=rows.join('');
+
+    var navBase=tBook-p.debt;
+    var navLow=tBook*(p.liq/100)-p.debt;
+    var navHigh=tRepl-p.debt;
+
+    document.getElementById('nav-low').textContent=fmt(navLow);
+    document.getElementById('nav-base').textContent=fmt(navBase);
+    document.getElementById('nav-high').textContent=fmt(navHigh);
+
+    var TF='padding:8px 14px;border-top:1px solid #E4E8F0;font-size:12.5px;';
+    var TFR=TF+'text-align:right;font-variant-numeric:tabular-nums;';
+    document.getElementById('tbl-foot').innerHTML=
+      '<tr>'+
+        '<td style="'+TF+'font-weight:700;background:#F7F9FC;" colspan="2">합계</td>'+
+        '<td style="'+TFR+'font-weight:700;background:#F7F9FC;">'+fmt(tCost)+'</td>'+
+        '<td style="'+TF+'background:#F7F9FC;"></td>'+
+        '<td style="'+TFR+'color:#6B7894;background:#F7F9FC;">'+fmt(tDepr)+'</td>'+
+        '<td style="'+TFR+'font-weight:700;background:#DAE3F3;color:#002060;">'+fmt(tBook)+'</td>'+
+        '<td style="'+TF+'background:#F7F9FC;" colspan="2"></td>'+
+      '</tr>'+
+      '<tr>'+
+        '<td style="'+TF+'font-weight:800;background:#DAE3F3;color:#002060;font-size:13px;" colspan="5">= 순자산가치 NAV (Base)</td>'+
+        '<td style="'+TFR+'font-weight:800;background:#DAE3F3;color:#002060;font-size:13px;">'+fmt(navBase)+'</td>'+
+        '<td style="'+TF+'background:#DAE3F3;" colspan="2"></td>'+
+      '</tr>';
+
+    document.getElementById('d-cost').textContent=fmt(tCost);
+    document.getElementById('d-depr').textContent=fmt(tDepr);
+    document.getElementById('d-book').textContent=fmt(tBook);
+    document.getElementById('d-debt').textContent=fmt(p.debt);
+    document.getElementById('d-nav').textContent=fmt(navBase);
+
+    var hasEst=assets.some(function(a){return a.src.includes('추정');});
+    var pill=document.getElementById('conf-pill');
+    var lbl=document.getElementById('conf-label');
+    if(hasEst){
+      pill.style.background='#FBEED0';pill.style.color='#B5780C';
+    } else {
+      pill.style.background='#E6F4EE';pill.style.color='#138A5A';
+    }
+    lbl.textContent=hasEst?'일부 추정값 포함':'신뢰도 보통';
+  }
+
+  window.removeAsset=function(id){
+    assets=assets.filter(function(a){return a.id!==id;});
+    render();
+  };
+
+  ['in-liq','in-rep','in-debt'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',render);
+  });
+
+  var UL_FOOTER={
+    ship:'선박 20년 · 기자재 10년 · 토지 감가상각 없음',
+    realestate:'건물 40년 · 토지 감가상각 없음 · 시설물 15년',
+    software:'소프트웨어 5년 · 서버·인프라 5년 · 특허·IP 10년 · 사무용비품 5년',
+    poultry:'계사 건물 20년 · 토지 감가상각 없음 · 사육설비 10년 · 냉동냉장 10년 · 차량 5년<br><span style="color:#138A5A;font-weight:600;">🐔 생물자산</span> 산란계 2.5년 · 종계 1.5년 · 육계 공정가치(시장가) 기준',
+  };
+
+  document.getElementById('in-sector').addEventListener('change',function(){
+    var sector=this.value;
+    var sample=SAMPLE_ASSETS[sector]||SAMPLE_ASSETS.ship;
+    assets=sample.map(function(a){return Object.assign({},a);});
+    nextId=assets.length+1;
+    var footer=document.getElementById('ul-footer');
+    if(footer)footer.innerHTML='<strong style="color:#6B7894;">적용 내용연수</strong><br>'+(UL_FOOTER[sector]||'');
+    render();
+  });
+
+  document.getElementById('reset-btn').addEventListener('click',function(){
+    document.getElementById('in-liq').value=DEFAULTS.liq;
+    document.getElementById('in-rep').value=DEFAULTS.rep;
+    document.getElementById('in-debt').value=DEFAULTS.debt;
+    document.getElementById('in-sector').value=DEFAULTS.sector;
+    render();
+  });
+
+  document.getElementById('add-btn').addEventListener('click',function(){
+    assets.push({id:nextId++,name:'새 자산 '+assets.length,cat:'기타유형',cost:10,acq:2022,land:false,src:'추정'});
+    render();
+  });
+
+  document.getElementById('demo-re').addEventListener('click',function(){
+    document.getElementById('in-sector').value='realestate';
+    document.getElementById('in-sector').dispatchEvent(new Event('change'));
+    document.getElementById('in-debt').value=60;
+    document.getElementById('in-liq').value=75;
+    document.getElementById('in-rep').value=140;
+    render();
+  });
+
+  document.getElementById('demo-clear').addEventListener('click',function(){
+    assets=[];render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
