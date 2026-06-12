@@ -63,6 +63,7 @@
           <option value="realestate">부동산 (Real Estate)</option>
           <option value="software">소프트웨어 (Software)</option>
           <option value="poultry">양계장 (Poultry Farm)</option>
+          <option value="renewable">재생에너지 (Renewable Energy)</option>
         </select>
         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-s3 text-oc-muted">방법론 IWA</span>
         <span id="conf-pill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-success-tint text-oc-success">
@@ -253,6 +254,7 @@
     realestate:{건물:40,토지:0,시설물:15,기타유형:10},
     software:{소프트웨어:5,서버및인프라:5,특허및IP:10,사무용비품:5,기타유형:5},
     poultry:{계사건물:20,토지:0,사육설비:10,냉동냉장설비:10,차량운반구:5,기타유형:5,산란계:2.5,종계:1.5,육계:0},
+    renewable:{태양광패널:25,풍력터빈:25,ESS배터리:10,인버터:10,송전설비:20,토지:0,기타유형:10},
   };
   var CY=2025;
   var SAMPLE_ASSETS={
@@ -281,6 +283,14 @@
       {id:6,name:'산란계 (15,000수)',cat:'산란계',cost:4.5,acq:2024,land:false,bio:true,src:'생물자산명세서_FY2025.xlsx · 산란계'},
       {id:7,name:'종계 (2,000수)',cat:'종계',cost:2.0,acq:2025,land:false,bio:true,src:'생물자산명세서_FY2025.xlsx · 종계'},
       {id:8,name:'육계 (30,000수)',cat:'육계',cost:3.0,acq:2025,land:false,bio:true,fair:true,src:'생물자산명세서_FY2025.xlsx · 육계'},
+    ],
+    renewable:[
+      {id:1,name:'태양광 패널 (100MW)',cat:'태양광패널',cost:150,acq:2020,land:false,src:'설비도입계약서_2020.pdf · 취득원가'},
+      {id:2,name:'풍력터빈 (5기)',cat:'풍력터빈',cost:80,acq:2021,land:false,src:'감정평가서_2024.pdf · p.5'},
+      {id:3,name:'ESS 배터리 시스템',cat:'ESS배터리',cost:30,acq:2022,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+      {id:4,name:'인버터·전력변환장치',cat:'인버터',cost:15,acq:2020,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
+      {id:5,name:'송전·계통연계 설비',cat:'송전설비',cost:20,acq:2020,land:false,src:'설비도입계약서_2020.pdf · 송전설비'},
+      {id:6,name:'발전소 부지',cat:'토지',cost:25,acq:2019,land:true,src:'등기부등본 · 취득가액'},
     ],
   };
   var assets=SAMPLE_ASSETS.ship.map(function(a){return Object.assign({},a);});
@@ -438,6 +448,7 @@
     realestate:'건물 40년 · 토지 감가상각 없음 · 시설물 15년',
     software:'소프트웨어 5년 · 서버·인프라 5년 · 특허·IP 10년 · 사무용비품 5년',
     poultry:'계사 건물 20년 · 토지 감가상각 없음 · 사육설비 10년 · 냉동냉장 10년 · 차량 5년<br><span style="color:#138A5A;font-weight:600;">🐔 생물자산</span> 산란계 2.5년 · 종계 1.5년 · 육계 공정가치(시장가) 기준',
+    renewable:'태양광 패널 25년 · 풍력터빈 25년 · ESS 배터리 10년 · 인버터 10년 · 송전설비 20년 · 토지 감가상각 없음',
   };
 
   document.getElementById('in-sector').addEventListener('change',function(){
