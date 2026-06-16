@@ -248,7 +248,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .iwa-tbl tbody tr .rul{cursor:default}
 .iwa-tbl.edit-mode tbody tr .rul{cursor:pointer;text-decoration:underline dotted}
 
-/* IWA 평가 섹션 */
+/* 순자산가치법 섹션 */
 .nav-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
 .nav-card{border:1px solid var(--oc-border);background:var(--oc-surface);border-radius:12px;padding:16px}
 .nav-card--base{border-color:#93C5FD;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);box-shadow:0 4px 16px rgba(29,78,216,.10)}
@@ -313,7 +313,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .feat-card__status{margin-left:auto}
 .feat-card__desc{font-size:11.5px;color:var(--oc-fg-muted);line-height:1.5}
 
-/* ══ IWA DCF-align layout ══ */
+/* ══ 순자산가치법 layout ══ */
 .iwa-topbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .iwa-topbar-pills{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .pill-tag{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid var(--oc-border);background:var(--oc-surface-2);color:var(--oc-fg-muted);display:inline-flex;align-items:center;gap:4px}
@@ -483,7 +483,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <div class="subnav">
     <button class="nav-t" data-view="overview">개요</button>
     <button class="nav-t active" data-view="dataset">데이터셋 · DART<span class="nav-pill" id="docCountPill">5</span></button>
-    <button class="nav-t" data-view="tpl-iwa">평가 · IWA 자산원가<span class="nav-pill" id="assetCountPill">5</span></button>
+    <button class="nav-t" data-view="tpl-iwa">평가 · 순자산가치법<span class="nav-pill" id="assetCountPill">5</span></button>
     <button class="nav-t" data-view="tpl-dcf">평가 · DCF</button>
     <button class="nav-t" data-view="tpl-ts">평가 · Team Score</button>
     <button class="nav-t" data-view="reviews">검토 요청<span class="nav-pill">1</span></button>
@@ -498,10 +498,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
         <!-- NAV 타일 -->
         <div class="ov-grid">
           <button class="ov-tile" onclick="go('tpl-iwa')">
-            <div class="ov-l">순자산가치 (IWA)</div>
+            <div class="ov-l">순자산가치 (NAV)</div>
             <div class="ov-v" id="ov-nav">—<small> 억원</small></div>
             <div class="ov-sub" id="ov-nav-range">—</div>
-            <span class="ov-go">IWA 열기 →</span>
+            <span class="ov-go">NAV 열기 →</span>
           </button>
           <button class="ov-tile" onclick="go('tpl-dcf')">
             <div class="ov-l">기업가치 (DCF)</div>
@@ -551,7 +551,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
             <div class="feat-card">
               <div class="feat-card__top">
                 <span class="feat-card__ic">🏗</span>
-                <span class="feat-card__name">IWA 자산원가 평가</span>
+                <span class="feat-card__name">순자산가치법 평가</span>
                 <span class="feat-card__status"><span class="badge badge--green">구현완료</span></span>
               </div>
               <div class="feat-card__desc">Low/Base/High 3시나리오 NAV 자동 산출. 가정값 슬라이더 조정.</div>
@@ -623,7 +623,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
           <span class="badge badge--blue">자동 파싱</span>
           <span id="datasetFilePill" style="font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:var(--oc-surface-3);color:var(--oc-fg-muted)">5개 파일</span>
           <span style="font-size:10.5px;color:var(--oc-fg-faint)">·</span>
-          <span style="font-size:10.5px;color:var(--oc-fg-muted)">적용 평가 모델: <b style="color:var(--oc-navy)">IWA 자산원가</b></span>
+          <span style="font-size:10.5px;color:var(--oc-fg-muted)">적용 평가 모델: <b style="color:var(--oc-navy)">순자산가치법</b></span>
           <div style="margin-left:auto;display:flex;gap:8px">
             <button class="btn btn--sm" onclick="toast('DART 다시 불러오기')">↻ 새로고침</button>
             <button class="btn btn--sm btn--pri" onclick="toast('데이터 소스 추가')">＋ 소스 연결</button>
@@ -700,12 +700,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
         </div>
       </div>
 
-      <!-- ══ IWA 평가 ══ -->
+      <!-- ══ 순자산가치법 ══ -->
       <div class="view" data-view="tpl-iwa">
 
         <!-- 헤더 -->
         <div class="iwa-topbar">
-          <span style="font-size:18px;font-weight:800;color:var(--oc-navy)">IWA 자산원가기준</span>
+          <span style="font-size:18px;font-weight:800;color:var(--oc-navy)">순자산가치법 (NAV)</span>
           <span style="font-size:10.5px;padding:2px 9px;border-radius:20px;background:var(--oc-surface-3);color:var(--oc-fg-muted);font-weight:700">취득원가 · 감가상각 반영</span>
           <div class="iwa-topbar-pills">
             <span class="pill-tag pill-tag--blue">📎 DART에서 추출됨</span>
@@ -949,16 +949,16 @@ Object.keys(ASSET_TYPES).forEach(function(k){
 // 서류 정의
 var DOC_DEFS = [
   // 자동
-  {id:"dart-pp",  group:"dart", icon:"📋", name:"유형자산명세서",      org:"금융감독원 DART",  srcType:"dart",    desc:"취득원가·감가상각·장부가치 자동 파싱",   evalModel:"IWA 자산원가", autoFetch:true},
-  {id:"dart-bs",  group:"dart", icon:"📊", name:"재무상태표",          org:"금융감독원 DART",  srcType:"dart",    desc:"총부채·자산총계 자동 파싱",              evalModel:"IWA / DCF", autoFetch:true},
+  {id:"dart-pp",  group:"dart", icon:"📋", name:"유형자산명세서",      org:"금융감독원 DART",  srcType:"dart",    desc:"취득원가·감가상각·장부가치 자동 파싱",   evalModel:"순자산가치법", autoFetch:true},
+  {id:"dart-bs",  group:"dart", icon:"📊", name:"재무상태표",          org:"금융감독원 DART",  srcType:"dart",    desc:"총부채·자산총계 자동 파싱",              evalModel:"NAV / DCF", autoFetch:true},
   {id:"dart-ar",  group:"dart", icon:"📰", name:"감사보고서",          org:"금융감독원 DART",  srcType:"dart",    desc:"외부감사 완료 재무제표 원본",            evalModel:"DCF", autoFetch:true},
   // 업로드
   {id:"hometax",  group:"upload", icon:"🧾", name:"표준재무제표증명원", org:"국세청 홈택스",    srcType:"hometax", desc:"법인세 신고 기반 비상장사 재무제표",      evalModel:"DCF"},
-  {id:"registry", group:"upload", icon:"🏛", name:"등기사항전부증명서", org:"법원 등기소",      srcType:"registry",desc:"부동산 소유 확인 및 취득원가 교차 검증",  evalModel:"IWA 보조"},
-  {id:"appraisal",group:"upload", icon:"📝", name:"감정평가보고서",     org:"감정평가법인",     srcType:"appraisal",desc:"특수자산 공정가치 산출 보고서",           evalModel:"IWA 보조"},
+  {id:"registry", group:"upload", icon:"🏛", name:"등기사항전부증명서", org:"법원 등기소",      srcType:"registry",desc:"부동산 소유 확인 및 취득원가 교차 검증",  evalModel:"NAV 보조"},
+  {id:"appraisal",group:"upload", icon:"📝", name:"감정평가보고서",     org:"감정평가법인",     srcType:"appraisal",desc:"특수자산 공정가치 산출 보고서",           evalModel:"NAV 보조"},
   // 미등록
-  {id:"kipris",   group:"miss",  icon:"💡", name:"특허·상표권 등록증", org:"특허청 KIPRIS",   srcType:"kipris",  desc:"무형자산 존재·등록일 확인 (API 무료)",   evalModel:"IWA 무형자산"},
-  {id:"pubprice", group:"miss",  icon:"🌏", name:"표준지공시지가",     org:"국토교통부",       srcType:"dart",    desc:"토지 재조달원가 자동 갱신 (API 무료)",   evalModel:"IWA 토지"},
+  {id:"kipris",   group:"miss",  icon:"💡", name:"특허·상표권 등록증", org:"특허청 KIPRIS",   srcType:"kipris",  desc:"무형자산 존재·등록일 확인 (API 무료)",   evalModel:"NAV 무형자산"},
+  {id:"pubprice", group:"miss",  icon:"🌏", name:"표준지공시지가",     org:"국토교통부",       srcType:"dart",    desc:"토지 재조달원가 자동 갱신 (API 무료)",   evalModel:"NAV 토지"},
   {id:"taxinv",   group:"miss",  icon:"📥", name:"부가세 신고내역",   org:"국세청 홈택스",    srcType:"hometax", desc:"매출 데이터 검증",                        evalModel:"DCF 보조"},
 ];
 
