@@ -1,493 +1,1520 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>자산·원가기준 가치평가 — 기업 데이터룸 (mock)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            oc: {
-              bg: "#F4F6FA", surface: "#FFFFFF", s2: "#F7F9FC", s3: "#EEF2F8",
-              border: "#E4E8F0", "border-strong": "#C9D2E0",
-              fg: "#1A2741", muted: "#6B7894", faint: "#9AA6BF",
-              navy: "#002060", blue: "#1D4ED8", "blue-deep": "#054DBA", "blue-tint": "#DAE3F3",
-              cyan: "#31D6E6", "cyan-tint": "#DDF6F9",
-              success: "#138A5A", "success-tint": "#E6F4EE",
-              warn: "#B5780C", "warn-tint": "#FBEED0",
-              danger: "#B0382F", "danger-tint": "#FBEAE8",
-            },
-          },
-          fontFamily: {
-            body: ['"Pretendard Variable"', "Pretendard", "-apple-system", "BlinkMacSystemFont", '"Apple SD Gothic Neo"', "sans-serif"],
-          },
-        },
-      },
-    };
-  </script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>Biyard asset v6 — 서류 중심 데이터룸</title>
+<style>
+:root{
+  --oc-bg:#F4F6FA;--oc-side-bg:#FAFBFD;--oc-side-border:#E4E8F0;
+  --oc-surface:#FFFFFF;--oc-surface-2:#F7F9FC;--oc-surface-3:#EEF2F8;
+  --oc-border:#E4E8F0;--oc-border-strong:#C9D2E0;
+  --oc-fg:#1A2741;--oc-fg-muted:#6B7894;--oc-fg-faint:#9AA6BF;
+  --oc-navy:#002060;--oc-blue:#1D4ED8;--oc-blue-deep:#054DBA;
+  --oc-blue-tint:#DAE3F3;--oc-cyan:#31D6E6;--oc-cyan-tint:#DDF6F9;
+  --oc-success:#138A5A;--oc-success-tint:#E6F4EE;
+  --oc-warn:#B5780C;--oc-warn-tint:#FBEED0;
+  --oc-danger:#B0382F;--oc-danger-tint:#F7E3E1;
+  --oc-purple:#6D3FC4;--oc-purple-tint:#ECE4FA;
+  --font:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI",sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--oc-bg);color:var(--oc-fg);font-family:var(--font);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ── Grid ── */
+.app{display:grid;grid-template-rows:48px 1fr;grid-template-columns:264px 1fr;height:100vh;grid-template-areas:"top top" "side main"}
+
+/* ── Topbar ── */
+.top{grid-area:top;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--oc-surface);border-bottom:1px solid var(--oc-border);z-index:40}
+.top__brand{display:flex;align-items:center;gap:8px}
+.top__word{font-size:16px;font-weight:800;color:var(--oc-navy)}
+.top__prod{font-size:12px;font-weight:700;color:var(--oc-fg-muted);padding-left:8px;border-left:1px solid var(--oc-border-strong)}
+.top__search{display:flex;align-items:center;gap:8px;width:340px;padding:6px 10px;background:var(--oc-surface-2);border:1px solid var(--oc-border);border-radius:8px;color:var(--oc-fg-muted);font-size:12.5px}
+.top__search kbd{margin-left:auto;font-family:var(--mono);font-size:10.5px;padding:1px 5px;border:1px solid var(--oc-border-strong);border-radius:4px;color:var(--oc-fg-faint)}
+.top__sp{flex:1}
+.top__ic{width:30px;height:30px;display:grid;place-items:center;border-radius:7px;color:var(--oc-fg-muted)}
+.top__ic:hover{background:var(--oc-surface-2)}
+.top__user{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:8px}
+.top__user:hover{background:var(--oc-surface-2)}
+.top__ava{width:24px;height:24px;border-radius:6px;background:var(--oc-blue-tint);color:var(--oc-navy);display:grid;place-items:center;font-size:11px;font-weight:800}
+
+/* ── Sidebar ── */
+.side{grid-area:side;background:var(--oc-side-bg);border-right:1px solid var(--oc-side-border);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.co-btn{margin:10px;padding:10px;border:1px solid var(--oc-border);border-radius:10px;background:var(--oc-surface);text-align:left;width:calc(100% - 20px)}
+.co-btn:hover{border-color:var(--oc-blue)}
+.co-head{display:flex;align-items:center;gap:9px}
+.co-ava{width:34px;height:34px;border-radius:8px;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.co-name{font-size:13px;font-weight:800;color:var(--oc-navy)}
+.co-type{font-size:11px;color:var(--oc-fg-muted);margin-top:1px}
+.co-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px;margin-top:10px;padding-top:9px;border-top:1px dashed var(--oc-border)}
+.co-ml{font-size:10px;color:var(--oc-fg-faint);font-weight:700}
+.co-mv{font-size:12px;color:var(--oc-fg);font-weight:700}
+
+/* switcher drop */
+.sw-drop{display:none;position:absolute;top:calc(100% + 10px);left:10px;right:10px;background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50}
+.sw-drop.open{display:block}
+.sw-drop__s{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--oc-border);font-size:12.5px;color:var(--oc-fg-muted)}
+.sw-drop__s input{flex:1;border:none;background:none;font-size:12.5px;outline:none;color:var(--oc-fg)}
+.sw-list{max-height:220px;overflow-y:auto}
+.sw-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;text-align:left;font-size:13px}
+.sw-item:hover{background:var(--oc-surface-2)}
+.sw-item.active{background:var(--oc-blue-tint)}
+.sw-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.sw-name{font-weight:700;color:var(--oc-navy);flex:1}
+.sw-biz{font-size:11px;color:var(--oc-fg-muted)}
+.sw-foot{padding:9px 12px;border-top:1px solid var(--oc-border);display:flex;gap:8px}
+.sw-foot button{font-size:11.5px;font-weight:700;color:var(--oc-blue)}
+
+/* channels */
+.chs{flex:1;overflow-y:auto;padding:4px 8px 12px}
+.ch-grp{display:flex;align-items:center;justify-content:space-between;padding:14px 8px 5px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--oc-fg-faint)}
+.ch-add-btn{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:15px;color:var(--oc-fg-faint)}
+.ch-add-btn:hover{background:var(--oc-surface-3);color:var(--oc-blue)}
+.ch{display:flex;align-items:center;gap:9px;width:100%;padding:7px 9px;border-radius:7px;font-size:13px;color:var(--oc-fg-muted);text-align:left}
+.ch:hover{background:var(--oc-surface-3);color:var(--oc-fg)}
+.ch.active{background:var(--oc-blue-tint);color:var(--oc-navy);font-weight:700}
+.ch__hash{width:16px;text-align:center;font-size:13px;color:var(--oc-fg-faint);flex:none}
+.ch.active .ch__hash{color:var(--oc-blue)}
+.ch__name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch__dot{width:7px;height:7px;border-radius:50%;background:var(--oc-blue);flex:none}
+.ch__badge{font-size:10px;font-weight:800;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--oc-danger);color:#fff;display:grid;place-items:center}
+.side__ft{display:flex;align-items:center;gap:7px;padding:9px 14px;border-top:1px solid var(--oc-side-border);font-size:11px;color:var(--oc-fg-muted)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--oc-success);box-shadow:0 0 0 3px var(--oc-success-tint)}
+
+/* ── Main ── */
+.main{grid-area:main;display:flex;flex-direction:column;overflow:hidden}
+.rhead{background:var(--oc-surface);border-bottom:1px solid var(--oc-border);padding:13px 22px}
+.crumb{font-size:11px;color:var(--oc-fg-faint);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.crumb a{color:var(--oc-fg-muted);text-decoration:none}
+.crumb a:hover{color:var(--oc-blue)}
+.rhead-top{display:flex;align-items:center;gap:11px}
+.rhead-hash{width:40px;height:40px;border-radius:10px;background:var(--oc-blue-tint);color:var(--oc-blue);display:grid;place-items:center;font-size:19px;font-weight:800;flex:none}
+.rhead-title{font-size:18px;font-weight:800;color:var(--oc-navy)}
+.rhead-meta{font-size:11.5px;color:var(--oc-fg-muted);margin-top:2px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.rhead-act{margin-left:auto;display:flex;gap:8px}
+
+/* badges */
+.badge{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.badge--blue{background:var(--oc-blue-tint);color:var(--oc-blue-deep)}
+.badge--green{background:var(--oc-success-tint);color:var(--oc-success)}
+.badge--warn{background:var(--oc-warn-tint);color:var(--oc-warn)}
+.badge--gray{background:var(--oc-surface-3);color:var(--oc-fg-muted)}
+.badge--danger{background:var(--oc-danger-tint);color:var(--oc-danger)}
+.badge .pdot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* src badges */
+.src-badge{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;white-space:nowrap}
+.src-dart{background:#DBEAFE;color:#1E40AF}
+.src-hometax{background:#D1FAE5;color:#065F46}
+.src-registry{background:#FEF3C7;color:#92400E}
+.src-kipris{background:#EDE9FE;color:#5B21B6}
+.src-manual{background:#FEE2E2;color:#991B1B}
+.src-appraisal{background:#F0FDF4;color:#14532D}
+
+/* buttons */
+.btn{font-size:12px;font-weight:700;padding:7px 12px;border-radius:8px;border:1px solid var(--oc-border-strong);color:var(--oc-fg);background:var(--oc-surface);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--oc-surface-2)}
+.btn--pri{background:var(--oc-blue);border-color:var(--oc-blue);color:#fff}
+.btn--pri:hover{background:var(--oc-blue-deep)}
+.btn--sm{padding:5px 9px;font-size:11.5px}
+
+/* subnav */
+.subnav{display:flex;align-items:center;gap:0;padding:0 18px;background:var(--oc-surface);border-bottom:1px solid var(--oc-border);overflow-x:auto}
+.nav-t{white-space:nowrap;flex:none;padding:11px 12px;font-size:13px;font-weight:700;color:var(--oc-fg-muted);border-bottom:2px solid transparent}
+.nav-t:hover{color:var(--oc-fg)}
+.nav-t.active{color:var(--oc-navy);border-bottom-color:var(--oc-blue)}
+.nav-pill{font-size:10px;font-weight:800;padding:1px 6px;border-radius:9px;background:var(--oc-surface-3);color:var(--oc-fg-muted);margin-left:5px}
+.nav-t.active .nav-pill{background:var(--oc-blue-tint);color:var(--oc-blue)}
+.nav-new{margin-left:4px;width:26px;height:26px;align-self:center;border-radius:7px;color:var(--oc-fg-faint);font-size:16px;display:grid;place-items:center;flex:none}
+.nav-new:hover{background:var(--oc-surface-3);color:var(--oc-blue)}
+
+/* body */
+.body{flex:1;overflow-y:auto;background:var(--oc-bg)}
+.page{max-width:1080px;margin:0 auto;padding:22px}
+.view{display:none}
+.view.active{display:block}
+
+/* commons */
+.sec{margin-bottom:26px}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.sec-title{font-size:14px;font-weight:800;color:var(--oc-navy)}
+.sec-sub{font-size:11.5px;color:var(--oc-fg-muted);flex:1}
+.panel{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;padding:16px}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--oc-surface-3);font-size:12px}
+.kv:last-child{border-bottom:none}
+.kv__k{color:var(--oc-fg-muted)}
+.kv__v{color:var(--oc-fg);font-weight:700}
+
+/* overview tiles */
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.ov-tile{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;padding:14px 16px;text-align:left;display:block;width:100%}
+.ov-tile:hover{border-color:var(--oc-blue);transform:translateY(-1px);box-shadow:0 4px 14px rgba(29,78,216,.08);transition:.12s}
+.ov-tile--hi{background:linear-gradient(135deg,#fff,#F4F8FE);border-color:var(--oc-blue-tint)}
+.ov-l{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--oc-fg-faint)}
+.ov-v{font-size:24px;font-weight:800;color:var(--oc-navy);margin-top:5px;line-height:1.1}
+.ov-v small{font-size:13px;font-weight:700;color:var(--oc-fg-muted)}
+.ov-sub{font-size:11px;color:var(--oc-fg-muted);margin-top:4px}
+.ov-go{font-size:10.5px;color:var(--oc-blue);font-weight:700;margin-top:8px;display:inline-block}
+
+/* doc completeness bar */
+.doc-ready{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;padding:14px 18px;margin-bottom:20px}
+.doc-ready__head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.doc-ready__title{font-size:13px;font-weight:800;color:var(--oc-navy)}
+.doc-ready__sub{font-size:11px;color:var(--oc-fg-muted);flex:1}
+.doc-ready__pct{font-size:18px;font-weight:800;color:var(--oc-navy)}
+.doc-track{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.doc-slot{border:1px solid var(--oc-border);border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:9px}
+.doc-slot--ok{background:var(--oc-success-tint);border-color:#A7F3D0}
+.doc-slot--warn{background:var(--oc-warn-tint);border-color:#FCD34D}
+.doc-slot--miss{background:var(--oc-surface-2);border-style:dashed}
+.doc-slot--auto{background:var(--oc-blue-tint);border-color:#93C5FD}
+.doc-slot__ic{font-size:18px;flex:none}
+.doc-slot__name{font-size:11.5px;font-weight:700;color:var(--oc-navy)}
+.doc-slot__src{font-size:10px;color:var(--oc-fg-muted)}
+.doc-slot__st{margin-left:auto;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px}
+.st-auto{background:var(--oc-blue-tint);color:var(--oc-blue-deep)}
+.st-ok{background:var(--oc-success-tint);color:var(--oc-success)}
+.st-miss{background:var(--oc-surface-3);color:var(--oc-fg-muted)}
+.st-warn{background:var(--oc-warn-tint);color:var(--oc-warn)}
+
+/* ── 서류 관리 탭 ── */
+.doc-section{margin-bottom:24px}
+.doc-section__title{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--oc-fg-faint);padding:0 2px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.doc-section__title::after{content:'';flex:1;height:1px;background:var(--oc-border)}
+.doc-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.doc-card{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:11px;overflow:hidden;text-align:left;display:block;width:100%}
+.doc-card:hover{border-color:var(--oc-blue);box-shadow:0 3px 12px rgba(29,78,216,.08);transform:translateY(-1px);transition:.12s}
+.doc-card__bar{height:3px}
+.doc-card__body{padding:12px}
+.doc-card__top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.doc-card__ic{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex:none}
+.doc-card__name{font-size:13px;font-weight:800;color:var(--oc-navy)}
+.doc-card__org{font-size:10.5px;color:var(--oc-fg-muted);margin-top:2px}
+.doc-card__foot{padding-top:9px;border-top:1px dashed var(--oc-border);display:flex;align-items:center;gap:7px}
+.doc-card__assets{font-size:10.5px;color:var(--oc-fg-muted)}
+.doc-card__assets b{color:var(--oc-navy);font-weight:700}
+.doc-card__action{margin-left:auto;font-size:11px;font-weight:700;color:var(--oc-blue)}
+.doc-card--miss{background:var(--oc-surface-2);border-style:dashed}
+.doc-card--miss .doc-card__name{color:var(--oc-fg-muted)}
+.doc-add-card{background:transparent;border:1.5px dashed var(--oc-border-strong);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:22px;min-height:100px;color:var(--oc-fg-faint);width:100%}
+.doc-add-card:hover{border-color:var(--oc-blue);color:var(--oc-blue)}
+
+/* ── 자산 테이블 ── */
+.iwa-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.iwa-tbl th{background:var(--oc-surface-2);border-bottom:1px solid var(--oc-border);padding:9px 12px;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--oc-fg-muted);text-align:left;white-space:nowrap}
+.iwa-tbl th.r,.iwa-tbl td.r{text-align:right}
+.iwa-tbl td{padding:9px 12px;border-bottom:1px solid var(--oc-border);vertical-align:middle;font-variant-numeric:tabular-nums;white-space:nowrap}
+.iwa-tbl tbody tr:hover td{background:var(--oc-surface-2)}
+.iwa-tbl tfoot td{border-top:1px solid var(--oc-border-strong);background:var(--oc-surface-2)}
+.iwa-tbl tfoot .nav-row td{background:var(--oc-blue-tint);font-weight:800;color:var(--oc-navy)}
+
+.cls-t{font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px}
+.cls-tangible{background:var(--oc-blue-tint);color:var(--oc-blue-deep)}
+.cls-intangible{background:var(--oc-cyan-tint);color:#0E7C8A}
+.cls-bio{background:var(--oc-success-tint);color:var(--oc-success)}
+.cls-invest{background:var(--oc-warn-tint);color:var(--oc-warn)}
+
+.type-sel{background:none;border:none;font-size:12px;font-weight:700;color:var(--oc-navy);cursor:pointer}
+.ul-cell{display:inline-block;padding:2px 6px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;color:var(--oc-navy)}
+.ul-cell:hover{background:var(--oc-blue-tint)}
+
+/* 인라인 편집 셀 — 기본은 읽기 전용 */
+.iwa-tbl tbody tr .edit-inp{
+  border:none;background:transparent;font-family:inherit;font-size:inherit;
+  color:var(--oc-navy);font-weight:700;width:100%;outline:none;
+  pointer-events:none;cursor:default;padding:2px 4px;border-radius:5px;min-width:60px;
+}
+.iwa-tbl tbody tr .edit-inp:hover{background:transparent}
+.iwa-tbl tbody tr .edit-inp:focus{background:transparent;border:none;box-shadow:none}
+/* 편집 모드 활성 */
+.iwa-tbl.edit-mode tbody tr .edit-inp{pointer-events:auto;cursor:pointer}
+.iwa-tbl.edit-mode tbody tr .edit-inp:hover{background:var(--oc-surface-3)}
+.iwa-tbl.edit-mode tbody tr .edit-inp:focus{
+  background:var(--oc-surface);border:1.5px solid var(--oc-blue);
+  cursor:text;padding:2px 6px;box-shadow:0 0 0 3px rgba(29,78,216,.1);
+}
+.iwa-tbl tbody tr .edit-inp.cost-inp{text-align:right;font-variant-numeric:tabular-nums}
+.iwa-tbl tbody tr .edit-inp.year-inp{text-align:center;width:60px}
+.edit-hint{font-size:9px;color:var(--oc-fg-faint);margin-left:3px;opacity:0;transition:.15s}
+.iwa-tbl.edit-mode tbody tr:hover .edit-hint{opacity:1}
+/* select / delete — 읽기 전용 숨김 */
+.iwa-tbl tbody tr .type-sel{pointer-events:none;background:transparent;border:none;-webkit-appearance:none;appearance:none;font-family:inherit;font-size:inherit;color:var(--oc-navy);font-weight:600;padding:0}
+.iwa-tbl.edit-mode tbody tr .type-sel{pointer-events:auto;-webkit-appearance:auto;appearance:auto;background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:5px;padding:2px 4px}
+.iwa-tbl tbody tr .rdel{visibility:hidden}
+.iwa-tbl.edit-mode tbody tr .rdel{visibility:visible}
+.iwa-tbl tbody tr .rul{cursor:default}
+.iwa-tbl.edit-mode tbody tr .rul{cursor:pointer;text-decoration:underline dotted}
+
+/* IWA 평가 섹션 */
+.nav-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.nav-card{border:1px solid var(--oc-border);background:var(--oc-surface);border-radius:12px;padding:16px}
+.nav-card--base{border-color:#93C5FD;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);box-shadow:0 4px 16px rgba(29,78,216,.10)}
+.nav-l{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--oc-fg-faint);margin-bottom:6px}
+.nav-v{font-size:26px;font-weight:800;color:var(--oc-navy);line-height:1.05;font-variant-numeric:tabular-nums}
+.nav-card--base .nav-v{font-size:30px;color:#1D4ED8}
+.nav-card--base .nav-u{color:#3B82F6}
+.nav-card--base .nav-l{color:#3B82F6}
+.nav-card--base .nav-note{color:#60A5FA}
+.nav-u{font-size:13px;font-weight:700;color:var(--oc-fg-muted);margin-left:4px}
+.nav-note{font-size:10.5px;color:var(--oc-fg-faint);margin-top:6px}
+
+/* assumption bar */
+.asm-bar{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.asm-item{flex:1;min-width:140px;padding:0 18px;border-right:1px solid var(--oc-border)}
+.asm-item:first-child{padding-left:0}
+.asm-item:last-child{border-right:none;padding-right:0}
+.asm-l{font-size:10.5px;font-weight:800;color:var(--oc-fg-muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.asm-v{font-size:18px;font-weight:800;color:var(--oc-navy);line-height:1.1;display:flex;align-items:baseline;gap:4px}
+.asm-v small{font-size:11px;font-weight:700;color:var(--oc-fg-muted)}
+.asm-v input[type=range]{width:100%;margin-top:8px;accent-color:var(--oc-blue);height:3px}
+.asm-hint{font-size:10px;color:var(--oc-fg-faint);margin-top:3px}
+.asm-reset{margin-left:12px;padding:6px 10px;border:1px solid var(--oc-border);border-radius:8px;font-size:11px;font-weight:700;color:var(--oc-fg-muted);background:var(--oc-surface-2)}
+.asm-reset:hover{background:var(--oc-surface-3);color:var(--oc-navy)}
+.asm-formula{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:10.5px;color:var(--oc-fg-faint);margin-left:14px}
+.asm-formula b{color:var(--oc-navy)}
+
+/* loading */
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-ov{display:none;position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:60;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.loading-ov.show{display:flex}
+.spinner{width:40px;height:40px;border-radius:50%;border:4px solid var(--oc-blue-tint);border-top-color:var(--oc-blue);animation:spin .7s linear infinite}
+
+/* modal */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(10,15,28,.4);z-index:80;align-items:center;justify-content:center}
+.modal-ov.show{display:flex}
+.modal-box{background:var(--oc-surface);border-radius:14px;width:480px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--oc-border);font-size:15px;font-weight:800;color:var(--oc-navy)}
+.modal-x{width:28px;height:28px;border-radius:7px;color:var(--oc-fg-muted);font-size:16px}
+.modal-x:hover{background:var(--oc-surface-2)}
+.modal-body{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.modal-lbl{font-size:11px;font-weight:800;color:var(--oc-fg-faint);letter-spacing:.04em;text-transform:uppercase;margin-top:2px}
+.modal-inp{width:100%;height:36px;border:1px solid var(--oc-border-strong);border-radius:8px;padding:0 11px;font-size:13px;color:var(--oc-fg);background:var(--oc-surface)}
+.modal-inp:focus{outline:none;border-color:var(--oc-blue)}
+.modal-sel{height:36px;width:100%;border:1px solid var(--oc-border-strong);border-radius:8px;padding:0 11px;font-size:13px;color:var(--oc-fg);background:var(--oc-surface)}
+.modal-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:13px 18px;border-top:1px solid var(--oc-border);background:var(--oc-surface-2)}
+
+/* toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--oc-navy);color:#fff;font-size:12.5px;font-weight:600;padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .2s ease both}
+
+/* feature list */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.feat-card{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:10px;padding:12px 14px}
+.feat-card__top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.feat-card__ic{font-size:18px}
+.feat-card__name{font-size:12.5px;font-weight:800;color:var(--oc-navy)}
+.feat-card__status{margin-left:auto}
+.feat-card__desc{font-size:11.5px;color:var(--oc-fg-muted);line-height:1.5}
+
+/* ══ IWA DCF-align layout ══ */
+.iwa-topbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.iwa-topbar-pills{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pill-tag{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid var(--oc-border);background:var(--oc-surface-2);color:var(--oc-fg-muted);display:inline-flex;align-items:center;gap:4px}
+.pill-tag--green{background:var(--oc-success-tint);border-color:var(--oc-success);color:var(--oc-success)}
+.pill-tag--blue{background:var(--oc-blue-tint);border-color:var(--oc-blue);color:var(--oc-blue)}
+
+/* 2-column: stretch so both columns are same height */
+.iwa-2col{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:stretch;margin-bottom:12px}
+@media(max-width:900px){.iwa-2col{grid-template-columns:1fr}}
+
+/* 가정 panel */
+.iwa-assume{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.iwa-assume__head{padding:12px 16px;border-bottom:1px solid var(--oc-border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.iwa-assume__title{font-size:13px;font-weight:800;color:var(--oc-navy)}
+.iwa-assume__body{padding:12px 16px;display:flex;flex-direction:column;gap:12px;flex:1}
+/* compact slider row — 2 lines: top row (label+value) + slider */
+.iwa-slider-row{display:flex;flex-direction:column;gap:3px}
+.iwa-slider-row__top{display:flex;justify-content:space-between;align-items:baseline}
+.iwa-slider-row__label{font-size:12px;font-weight:700;color:var(--oc-navy)}
+.iwa-slider-row__meta{font-size:10px;color:var(--oc-fg-faint)}
+.iwa-slider-row__val{font-size:15px;font-weight:800;color:var(--oc-navy)}
+.iwa-slider-row__sub{font-size:10px;color:var(--oc-fg-faint);font-weight:400}
+.iwa-assume__footer{padding:10px 16px;border-top:1px solid var(--oc-border);font-size:10.5px;color:var(--oc-fg-muted);margin-top:auto;flex-shrink:0}
+
+/* NAV 빌드업 panel — fills the right column height */
+.iwa-buildup{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;height:100%}
+.iwa-buildup__head{padding:12px 16px;border-bottom:1px solid var(--oc-border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.iwa-buildup__title{font-size:13px;font-weight:800;color:var(--oc-navy)}
+.iwa-buildup__unit{font-size:10.5px;color:var(--oc-fg-faint)}
+.iwa-buildup table{width:100%;border-collapse:collapse;font-size:12.5px}
+.iwa-buildup td{padding:8px 14px;border-bottom:1px solid var(--oc-border);vertical-align:middle}
+.iwa-buildup tr:last-child td{border-bottom:none}
+.iwa-buildup__label{color:var(--oc-fg-muted);font-size:12px}
+.iwa-buildup__val{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--oc-navy);width:80px}
+.iwa-buildup__src{text-align:right;width:90px}
+.iwa-buildup__src-tag{font-size:10px;padding:1px 7px;border-radius:20px;border:1px solid var(--oc-border);color:var(--oc-fg-muted);display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.iwa-buildup__src-tag--dart{border-color:#BFDBFE;color:#1D4ED8;background:#EFF6FF}
+.iwa-buildup__src-tag--auto{border-color:#D1FAE5;color:#138A5A;background:#F0FDF4}
+.iwa-buildup__src-tag--manual{border-color:#FDE68A;color:#B5780C;background:#FFFBEB}
+.iwa-buildup tr.row--result td{background:var(--oc-surface-2);font-weight:800}
+.iwa-buildup tr.row--result .iwa-buildup__val{font-size:14px;color:var(--oc-navy)}
+.iwa-buildup .row--nav td{background:var(--oc-blue-tint)}
+.iwa-buildup .row--nav .iwa-buildup__val{color:var(--oc-blue);font-size:15px}
+.iwa-buildup__footer{padding:8px 14px;border-top:1px solid var(--oc-border);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--oc-surface-2)}
+
+/* 구성 바 — thin full-width strip */
+.iwa-compose-strip{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:10px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.iwa-compose-strip__bar{flex:1;height:14px;display:flex;border-radius:4px;overflow:hidden;gap:1px}
+.iwa-compose-strip__seg{height:100%;transition:flex .4s}
+.iwa-compose-strip__legend{display:flex;gap:12px;flex-shrink:0}
+.iwa-compose-strip__item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--oc-fg-muted);white-space:nowrap}
+.iwa-compose-strip__dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.iwa-compose-strip__val{font-weight:700;color:var(--oc-navy)}
+
+/* composition bar (legacy, kept harmless) */
+.iwa-compose{background:var(--oc-surface);border:1px solid var(--oc-border);border-radius:12px;padding:16px 20px;margin-bottom:16px}
+.iwa-compose__title{font-size:11px;font-weight:700;color:var(--oc-fg-muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.iwa-compose__bar{display:flex;height:32px;border-radius:7px;overflow:hidden;gap:2px}
+.iwa-compose__seg{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:#fff;transition:flex .4s;min-width:32px}
+.iwa-compose__legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.iwa-compose__dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;flex-shrink:0}
+.iwa-compose__litem{display:flex;align-items:center;font-size:11px;color:var(--oc-fg-muted)}
+.iwa-compose__lval{font-weight:700;color:var(--oc-navy);margin-left:4px}
+
+/* 공유 바 */
+.iwa-share-bar{margin-top:12px;padding:12px 20px;border:1px solid var(--oc-border);border-radius:12px;background:var(--oc-surface);display:flex;align-items:center;justify-content:space-between}
+</style>
 </head>
-<body class="m-0 bg-oc-bg text-oc-fg font-body text-[14px] antialiased">
+<body>
+<div class="app">
 
-<div id="nav-app" class="grid grid-rows-[52px_1fr] min-h-screen">
+<!-- TOP -->
+<header class="top">
+  <div class="top__brand">
+    <span class="top__word">Biyard</span>
+    <span class="top__prod">asset</span>
+  </div>
+  <div class="top__search">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>이 룸에서 검색…</span><kbd>⌘K</kbd>
+  </div>
+  <div class="top__sp"></div>
+  <button class="top__ic" title="알림"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+  <button class="top__user">
+    <span class="top__ava">도</span>
+    <span style="font-size:12.5px;font-weight:700;color:var(--oc-navy)">도윤</span>
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+</header>
 
-  <!-- 상단 topbar -->
-  <header class="flex items-center justify-between px-[22px] bg-white border-b border-oc-border">
-    <div class="flex items-center gap-2 text-[13px]">
-      <span class="text-oc-faint">데이터룸</span>
-      <span class="text-oc-faint">/</span>
-      <span class="text-oc-muted font-bold">Korea Shipping Co.</span>
-      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-cyan-tint text-oc-blue-deep">기업 · Company</span>
-      <span class="text-oc-faint">/</span>
-      <strong class="text-oc-navy font-extrabold">가치평가 (자산·원가기준)</strong>
-    </div>
-    <label class="inline-flex items-center gap-1.5 text-[12px] text-oc-muted font-bold">
-      <input type="checkbox" class="accent-oc-blue" />
-      <span>투자사 공유</span>
-    </label>
-  </header>
-
-  <main class="overflow-y-auto px-8 pt-6 pb-16">
-
-    <!-- 섹션 헤더 -->
-    <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+<!-- SIDE -->
+<aside class="side">
+  <button class="co-btn" id="coBtn">
+    <div class="co-head">
+      <span class="co-ava" id="coAva" style="background:linear-gradient(135deg,#1D4ED8,#6D3FC4)">A</span>
       <div>
-        <h1 class="m-0 text-[22px] font-extrabold text-oc-navy">기업가치 (자산·원가기준)</h1>
-        <p class="mt-1 mb-0 text-[12.5px] text-oc-muted">자산·원가 접근법 · 보유 자산의 장부가치에서 부채를 차감한 순자산가치(NAV)</p>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <select id="in-sector" class="px-2.5 py-1.5 bg-white border border-oc-border rounded-md text-[12px] font-bold text-oc-navy">
-          <option value="ship">선박금융 (Ship Finance)</option>
-          <option value="realestate">부동산 (Real Estate)</option>
-          <option value="software">소프트웨어 (Software)</option>
-          <option value="poultry">양계장 (Poultry Farm)</option>
-          <option value="renewable">재생에너지 (Renewable Energy)</option>
-        </select>
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-s3 text-oc-muted">방법론 IWA</span>
-        <span id="conf-pill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-success-tint text-oc-success">
-          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-          <span id="conf-label">신뢰도 보통</span>
-        </span>
-        <button id="reset-btn" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-oc-border rounded-md text-oc-navy text-[12px] font-bold hover:bg-oc-s2 transition-colors">↺ LLM 제안값으로 초기화</button>
+        <div class="co-name" id="coName">주식회사 A</div>
+        <div class="co-type" id="coType">회사 · 일반 법인</div>
       </div>
     </div>
+    <div class="co-meta">
+      <div><div class="co-ml">데이터룸</div><div class="co-mv">2개</div></div>
+      <div><div class="co-ml">등록 서류</div><div class="co-mv" id="coDocCount">5건</div></div>
+    </div>
+  </button>
 
-    <!-- 자산 없음 배너 -->
-    <div id="miss-banner" class="hidden items-center gap-3 px-4 py-3 rounded-lg mb-4 text-[12.5px] bg-oc-warn-tint border border-yellow-200">
-      <span class="shrink-0 w-[22px] h-[22px] rounded-full inline-flex items-center justify-center font-extrabold text-[12px] text-white bg-oc-warn">!</span>
+  <div class="sw-drop" id="swDrop">
+    <div class="sw-drop__s">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="swSearch" placeholder="기업명 검색…"/>
+    </div>
+    <div class="sw-list" id="swList"></div>
+    <div class="sw-foot">
+      <button onclick="toast('DART에서 새 기업 불러오기')">+ DART 불러오기</button>
+      <button onclick="toast('재무제표 업로드')" style="margin-left:auto;color:var(--oc-fg-muted)">업로드</button>
+    </div>
+  </div>
+
+  <nav class="chs">
+    <button class="ch" onclick="toast('전체 활동')">
+      <span class="ch__hash">⌂</span><span class="ch__name">활동</span>
+    </button>
+    <div style="height:1px;background:var(--oc-side-border);margin:6px 4px"></div>
+    <div class="ch-grp"><span>데이터 룸</span><button class="ch-add-btn" onclick="toast('룸 추가')">+</button></div>
+    <button class="ch active" id="chSeriesA">
+      <span class="ch__hash">#</span><span class="ch__name">Series A 라운드</span>
+      <span class="ch__dot"></span>
+    </button>
+    <button class="ch" onclick="toast('#M&A 사전검토')">
+      <span class="ch__hash">#</span><span class="ch__name">M&amp;A 사전검토</span>
+      <span class="ch__badge">2</span>
+    </button>
+    <button class="ch" style="border:1.5px dashed var(--oc-border-strong);color:var(--oc-fg-faint);margin-top:4px" onclick="toast('룸 추가')">
+      <span class="ch__hash">+</span><span class="ch__name">룸 추가</span>
+    </button>
+  </nav>
+  <div class="side__ft"><span class="live-dot"></span><span>실시간 동기화 중</span></div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="rhead">
+    <div class="crumb">
+      <a href="#">데이터 룸</a> ›
+      <a href="#" id="crumbCo">주식회사 A</a> ›
+      <span>Series A 라운드</span>
+    </div>
+    <div class="rhead-top">
+      <span class="rhead-hash">#</span>
       <div>
-        <strong class="block text-oc-navy mb-0.5">자산 항목이 없어 NAV를 산출할 수 없습니다.</strong>
-        <span class="text-oc-muted">아래 <b>+ 자산 추가</b> 버튼으로 보유 자산을 입력하세요.</span>
+        <div class="rhead-title">Series A 라운드</div>
+        <div class="rhead-meta">
+          <span class="badge badge--blue"><span class="pdot"></span>분석중</span>
+          <span>·</span><span>투자유치</span>
+          <span>·</span>
+          <span>데이터셋 <b id="hd-doc">5</b> · 자산 <b id="hd-asset">5</b> · 평가 모델 <b>3</b></span>
+        </div>
+      </div>
+      <div class="rhead-act">
+        <button class="btn" onclick="toast('룸 설정')">⚙ 설정</button>
+        <button class="btn btn--pri" onclick="toast('투자사 초대')">＋ 투자사 초대</button>
       </div>
     </div>
+  </div>
 
-    <!-- NAV 범위 카드 3개 -->
-    <div class="grid grid-cols-3 gap-3 mb-5">
-      <div class="bg-white border border-oc-border rounded-xl p-4">
-        <div class="text-[9.5px] font-extrabold tracking-[0.06em] uppercase text-oc-faint mb-1.5">보수적 (Low)</div>
-        <div class="text-[26px] font-extrabold text-oc-navy tabular-nums leading-tight">
-          <span id="nav-low">—</span><span class="text-[13px] font-bold text-oc-muted ml-1">억원</span>
-        </div>
-        <div class="text-[10.5px] text-oc-muted mt-1.5">청산가치 · 즉시 처분 가정</div>
-      </div>
-      <div class="bg-gradient-to-br from-oc-blue-tint to-white border border-oc-blue-tint rounded-xl p-4">
-        <div class="text-[9.5px] font-extrabold tracking-[0.06em] uppercase text-oc-faint mb-1.5">기준 (Base) · NAV</div>
-        <div class="text-[30px] font-extrabold text-oc-navy tabular-nums leading-tight">
-          <span id="nav-base">—</span><span class="text-[13px] font-bold text-oc-muted ml-1">억원</span>
-        </div>
-        <div class="text-[10.5px] text-oc-muted mt-1.5">장부가치(취득원가−감가상각) − 부채</div>
-      </div>
-      <div class="bg-white border border-oc-border rounded-xl p-4">
-        <div class="text-[9.5px] font-extrabold tracking-[0.06em] uppercase text-oc-faint mb-1.5">낙관적 (High)</div>
-        <div class="text-[26px] font-extrabold text-oc-navy tabular-nums leading-tight">
-          <span id="nav-high">—</span><span class="text-[13px] font-bold text-oc-muted ml-1">억원</span>
-        </div>
-        <div class="text-[10.5px] text-oc-muted mt-1.5">재조달원가 · 현재 재취득 가정</div>
-      </div>
-    </div>
+  <!-- SUBNAV -->
+  <div class="subnav">
+    <button class="nav-t" data-view="overview">개요</button>
+    <button class="nav-t active" data-view="dataset">데이터셋 · DART<span class="nav-pill" id="docCountPill">5</span></button>
+    <button class="nav-t" data-view="tpl-iwa">평가 · IWA 자산원가<span class="nav-pill" id="assetCountPill">5</span></button>
+    <button class="nav-t" data-view="tpl-dcf">평가 · DCF</button>
+    <button class="nav-t" data-view="tpl-ts">평가 · Team Score</button>
+    <button class="nav-t" data-view="reviews">검토 요청<span class="nav-pill">1</span></button>
+    <button class="nav-new" onclick="toast('탭 추가')">＋</button>
+  </div>
 
-    <!-- 2단 레이아웃 -->
-    <div class="grid grid-cols-[300px_1fr] gap-5 items-start">
+  <div class="body">
+    <div class="page">
 
-      <!-- 가정 패널 -->
-      <section class="bg-white border border-oc-border rounded-xl sticky top-4">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-oc-border">
-          <h3 class="m-0 text-[13px] font-extrabold text-oc-navy">가정 (Assumptions)</h3>
-          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-cyan-tint text-oc-blue-deep">LLM 제안</span>
+      <!-- ══ 개요 ══ -->
+      <div class="view" data-view="overview">
+        <!-- NAV 타일 -->
+        <div class="ov-grid">
+          <button class="ov-tile" onclick="go('tpl-iwa')">
+            <div class="ov-l">순자산가치 (IWA)</div>
+            <div class="ov-v" id="ov-nav">—<small> 억원</small></div>
+            <div class="ov-sub" id="ov-nav-range">—</div>
+            <span class="ov-go">IWA 열기 →</span>
+          </button>
+          <button class="ov-tile" onclick="go('tpl-dcf')">
+            <div class="ov-l">기업가치 (DCF)</div>
+            <div class="ov-v">41.2<small> $M</small></div>
+            <div class="ov-sub">범위 28.4 – 58.9 · Base</div>
+            <span class="ov-go">DCF 열기 →</span>
+          </button>
+          <button class="ov-tile" onclick="go('tpl-ts')">
+            <div class="ov-l">Team Score</div>
+            <div class="ov-v">74<small> /100</small></div>
+            <div class="ov-sub">Series A 평균 +12점</div>
+            <span class="ov-go">Team Score 열기 →</span>
+          </button>
+          <button class="ov-tile" onclick="go('dataset')">
+            <div class="ov-l">서류 완성도</div>
+            <div class="ov-v" id="ov-doc-pct">—<small> %</small></div>
+            <div class="ov-sub" id="ov-doc-sub">—</div>
+            <span class="ov-go">서류 관리 →</span>
+          </button>
         </div>
 
-        <!-- 청산계수 -->
-        <div data-key="liq" class="px-4 py-3.5 border-b border-oc-border">
-          <div class="flex items-baseline justify-between mb-1">
-            <label for="in-liq" class="text-[12.5px] font-bold text-oc-navy">청산계수 (Low 기준)</label>
-            <span id="hint-liq" class="text-[10px] text-oc-faint font-semibold">LLM 제안 80%</span>
+        <!-- 서류 완성도 트래커 -->
+        <div class="doc-ready">
+          <div class="doc-ready__head">
+            <div class="doc-ready__title">공식 서류 등록 현황</div>
+            <div class="doc-ready__sub">투자자가 검증 가능한 공식 서류 기반으로 평가합니다</div>
+            <div class="doc-ready__pct" id="ov-pct-num">—</div>
           </div>
-          <div class="flex items-center gap-3 my-2">
-            <input type="range" id="in-liq" min="40" max="100" step="5" value="80" class="flex-1 accent-oc-blue" />
-            <output id="out-liq" class="min-w-[48px] text-right text-[14px] font-extrabold text-oc-blue-deep tabular-nums">80%</output>
-          </div>
-          <p class="m-0 text-[10.5px] text-oc-muted leading-relaxed">즉시 처분 시 장부가치 대비 회수 비율. 선박 시황·유동성 반영</p>
+          <div class="doc-track" id="docTrack"></div>
         </div>
 
-        <!-- 재조달원가 배수 -->
-        <div data-key="rep" class="px-4 py-3.5 border-b border-oc-border">
-          <div class="flex items-baseline justify-between mb-1">
-            <label for="in-rep" class="text-[12.5px] font-bold text-oc-navy">재조달원가 배수 (High 기준)</label>
-            <span id="hint-rep" class="text-[10px] text-oc-faint font-semibold">LLM 제안 130%</span>
+        <!-- 기능 목록 -->
+        <div class="sec">
+          <div class="sec-head">
+            <div class="sec-title">서비스 기능 현황</div>
+            <div class="sec-sub">구현 완료 · 개발중 · 예정</div>
           </div>
-          <div class="flex items-center gap-3 my-2">
-            <input type="range" id="in-rep" min="80" max="200" step="5" value="130" class="flex-1 accent-oc-blue" />
-            <output id="out-rep" class="min-w-[48px] text-right text-[14px] font-extrabold text-oc-blue-deep tabular-nums">130%</output>
-          </div>
-          <p class="m-0 text-[10.5px] text-oc-muted leading-relaxed">현재 시점 동급 자산 재취득 비용의 취득원가 대비 배수</p>
-        </div>
-
-        <!-- 총부채 -->
-        <div data-key="debt" class="px-4 py-3.5 border-b border-oc-border">
-          <div class="flex items-baseline justify-between mb-1">
-            <label for="in-debt" class="text-[12.5px] font-bold text-oc-navy">총부채</label>
-            <span id="hint-debt" class="text-[10px] text-oc-faint font-semibold">LLM 제안 40억</span>
-          </div>
-          <div class="flex items-center gap-3 my-2">
-            <input type="range" id="in-debt" min="0" max="200" step="5" value="40" class="flex-1 accent-oc-blue" />
-            <output id="out-debt" class="min-w-[64px] text-right text-[14px] font-extrabold text-oc-blue-deep tabular-nums">40억원</output>
-          </div>
-          <p class="m-0 text-[10.5px] text-oc-muted leading-relaxed">선박담보대출·리스부채 합계. NAV 산출 시 차감</p>
-        </div>
-
-        <div id="ul-footer" class="px-4 py-3 text-[10.5px] text-oc-faint leading-relaxed">
-          <strong class="text-oc-muted">섹터별 기본 내용연수</strong><br>
-          선박금융: 선박 20년 · 기자재 10년<br>
-          부동산: 건물 40년 · 토지 감가상각 없음 · 시설물 15년
-        </div>
-      </section>
-
-      <!-- 오른쪽 패널 -->
-      <section>
-        <!-- 자산 테이블 -->
-        <div class="bg-white border border-oc-border rounded-xl overflow-hidden mb-4">
-          <div class="flex items-center justify-between px-4 py-3 border-b border-oc-border">
-            <h3 class="m-0 text-[13px] font-extrabold text-oc-navy">보유 자산 목록</h3>
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-oc-s3 text-oc-muted">단위 억원</span>
-              <button id="add-btn" class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-oc-blue text-white rounded-md text-[11.5px] font-bold hover:bg-oc-blue-deep transition-colors">+ 자산 추가</button>
+          <div class="feat-grid">
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">📄</span>
+                <span class="feat-card__name">DART 자동 파싱</span>
+                <span class="feat-card__status"><span class="badge badge--green">구현완료</span></span>
+              </div>
+              <div class="feat-card__desc">감사보고서·유형자산명세서 자동 수집. 취득원가·취득연도 자동 입력.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">🏗</span>
+                <span class="feat-card__name">IWA 자산원가 평가</span>
+                <span class="feat-card__status"><span class="badge badge--green">구현완료</span></span>
+              </div>
+              <div class="feat-card__desc">Low/Base/High 3시나리오 NAV 자동 산출. 가정값 슬라이더 조정.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">📊</span>
+                <span class="feat-card__name">서류 등록 현황</span>
+                <span class="feat-card__status"><span class="badge badge--green">구현완료</span></span>
+              </div>
+              <div class="feat-card__desc">등록된 공식 서류 목록, 추출 자산 수, 검증 상태 표시.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">🏠</span>
+                <span class="feat-card__name">국토부 공시지가 연동</span>
+                <span class="feat-card__status"><span class="badge badge--warn">개발중</span></span>
+              </div>
+              <div class="feat-card__desc">토지 자산의 재조달원가를 표준지공시지가 API로 자동 갱신.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">🧾</span>
+                <span class="feat-card__name">홈택스 재무제표 연동</span>
+                <span class="feat-card__status"><span class="badge badge--warn">개발중</span></span>
+              </div>
+              <div class="feat-card__desc">비상장사 국세청 표준재무제표 PDF 업로드 → OCR 자동 파싱.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">📑</span>
+                <span class="feat-card__name">등기부등본 업로드</span>
+                <span class="feat-card__status"><span class="badge badge--gray">예정</span></span>
+              </div>
+              <div class="feat-card__desc">부동산 소유 여부 확인 및 취득원가 교차 검증.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">💹</span>
+                <span class="feat-card__name">DCF 상세 모델</span>
+                <span class="feat-card__status"><span class="badge badge--gray">예정</span></span>
+              </div>
+              <div class="feat-card__desc">5개년 FCF 입력, WACC, Terminal Value. 재무제표 연동.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">👥</span>
+                <span class="feat-card__name">Team Score 상세</span>
+                <span class="feat-card__status"><span class="badge badge--gray">예정</span></span>
+              </div>
+              <div class="feat-card__desc">Biyard 5-factor (TB·CP·EG·CT·MR) 자동 산정.</div>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card__top">
+                <span class="feat-card__ic">🔗</span>
+                <span class="feat-card__name">투자사 초대·협업</span>
+                <span class="feat-card__status"><span class="badge badge--gray">예정</span></span>
+              </div>
+              <div class="feat-card__desc">투자사별 열람 범위 설정, 코멘트, 검토 요청 워크플로우.</div>
             </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full border-separate border-spacing-0 text-[12.5px]">
+        </div>
+      </div>
+
+      <!-- ══ 데이터셋 ══ -->
+      <div class="view active" data-view="dataset">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+          <span style="font-size:18px;font-weight:800;color:var(--oc-navy)">DART 데이터셋</span>
+          <span class="badge badge--blue">자동 파싱</span>
+          <span id="datasetFilePill" style="font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:var(--oc-surface-3);color:var(--oc-fg-muted)">5개 파일</span>
+          <span style="font-size:10.5px;color:var(--oc-fg-faint)">·</span>
+          <span style="font-size:10.5px;color:var(--oc-fg-muted)">적용 평가 모델: <b style="color:var(--oc-navy)">IWA 자산원가</b></span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn--sm" onclick="toast('DART 다시 불러오기')">↻ 새로고침</button>
+            <button class="btn btn--sm btn--pri" onclick="toast('데이터 소스 추가')">＋ 소스 연결</button>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--oc-border);display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;font-weight:800;color:var(--oc-navy)">파싱된 문서</span>
+            <span style="font-size:11px;color:var(--oc-fg-muted)">금융감독원 DART Open API · dart.fss.or.kr</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+            <thead>
+              <tr style="background:var(--oc-surface-2);text-align:left">
+                <th style="padding:9px 16px;font-weight:700;color:var(--oc-fg-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em">파일</th>
+                <th style="padding:9px 12px;font-weight:700;color:var(--oc-fg-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em">크기</th>
+                <th style="padding:9px 12px;font-weight:700;color:var(--oc-fg-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em">소스</th>
+                <th style="padding:9px 12px;font-weight:700;color:var(--oc-fg-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em">인덱싱</th>
+                <th style="padding:9px 12px;font-weight:700;color:var(--oc-fg-muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em">추출 자산</th>
+                <th style="padding:9px 16px"></th>
+              </tr>
+            </thead>
+            <tbody id="datasetTbody">
+              <tr style="border-bottom:1px solid var(--oc-border)">
+                <td style="padding:12px 16px"><div style="font-weight:700;color:var(--oc-navy)">유형자산명세서_2024.pdf</div><div style="font-size:10.5px;color:var(--oc-fg-muted);margin-top:2px">수정 2일 전 · DART 시스템</div></td>
+                <td style="padding:12px">640KB</td>
+                <td style="padding:12px"><span class="src-badge src-dart">DART</span></td>
+                <td style="padding:12px"><span class="badge badge--green" style="font-size:10px">완료</span></td>
+                <td style="padding:12px;font-weight:700;color:var(--oc-navy)">6개</td>
+                <td style="padding:12px 16px;text-align:right"><button class="btn btn--sm" onclick="toast('유형자산명세서 미리보기')">미리보기</button></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--oc-border)">
+                <td style="padding:12px 16px"><div style="font-weight:700;color:var(--oc-navy)">재무상태표_2024.pdf</div><div style="font-size:10.5px;color:var(--oc-fg-muted);margin-top:2px">수정 2일 전 · DART 시스템</div></td>
+                <td style="padding:12px">420KB</td>
+                <td style="padding:12px"><span class="src-badge src-dart">DART</span></td>
+                <td style="padding:12px"><span class="badge badge--green" style="font-size:10px">완료</span></td>
+                <td style="padding:12px;font-weight:700;color:var(--oc-navy)">—</td>
+                <td style="padding:12px 16px;text-align:right"><button class="btn btn--sm" onclick="toast('재무상태표 미리보기')">미리보기</button></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--oc-border)">
+                <td style="padding:12px 16px"><div style="font-weight:700;color:var(--oc-navy)">손익계산서_2024.pdf</div><div style="font-size:10.5px;color:var(--oc-fg-muted);margin-top:2px">수정 2일 전 · DART 시스템</div></td>
+                <td style="padding:12px">380KB</td>
+                <td style="padding:12px"><span class="src-badge src-dart">DART</span></td>
+                <td style="padding:12px"><span class="badge badge--green" style="font-size:10px">완료</span></td>
+                <td style="padding:12px;font-weight:700;color:var(--oc-navy)">—</td>
+                <td style="padding:12px 16px;text-align:right"><button class="btn btn--sm" onclick="toast('손익계산서 미리보기')">미리보기</button></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--oc-border)">
+                <td style="padding:12px 16px"><div style="font-weight:700;color:var(--oc-navy)">현금흐름표_2022-2024.pdf</div><div style="font-size:10.5px;color:var(--oc-fg-muted);margin-top:2px">수정 5일 전 · DART 시스템</div></td>
+                <td style="padding:12px">510KB</td>
+                <td style="padding:12px"><span class="src-badge src-dart">DART</span></td>
+                <td style="padding:12px"><span class="badge badge--green" style="font-size:10px">완료</span></td>
+                <td style="padding:12px;font-weight:700;color:var(--oc-navy)">—</td>
+                <td style="padding:12px 16px;text-align:right"><button class="btn btn--sm" onclick="toast('현금흐름표 미리보기')">미리보기</button></td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px"><div style="font-weight:700;color:var(--oc-navy)">감사보고서_2024.pdf</div><div style="font-size:10.5px;color:var(--oc-fg-muted);margin-top:2px">수정 1주 전 · 외부감사인 업로드</div></td>
+                <td style="padding:12px">890KB</td>
+                <td style="padding:12px"><span class="src-badge src-appraisal">감정평가</span></td>
+                <td style="padding:12px"><span class="badge badge--warn" style="font-size:10px">처리중</span></td>
+                <td style="padding:12px;color:var(--oc-fg-faint)">—</td>
+                <td style="padding:12px 16px;text-align:right"><button class="btn btn--sm" onclick="toast('감사보고서 미리보기')">미리보기</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:16px;padding:14px 16px;background:var(--oc-surface-2);border-radius:10px;border:1px dashed var(--oc-border);display:flex;align-items:center;gap:12px;cursor:pointer" onclick="toast('데이터 소스 추가')">
+          <span style="font-size:20px">＋</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--oc-navy)">데이터 소스 연결</div>
+            <div style="font-size:11px;color:var(--oc-fg-muted)">Google Drive · 홈택스 · 등기소 · 감정평가 기관 연동 가능</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ IWA 평가 ══ -->
+      <div class="view" data-view="tpl-iwa">
+
+        <!-- 헤더 -->
+        <div class="iwa-topbar">
+          <span style="font-size:18px;font-weight:800;color:var(--oc-navy)">IWA 자산원가기준</span>
+          <span style="font-size:10.5px;padding:2px 9px;border-radius:20px;background:var(--oc-surface-3);color:var(--oc-fg-muted);font-weight:700">취득원가 · 감가상각 반영</span>
+          <div class="iwa-topbar-pills">
+            <span class="pill-tag pill-tag--blue">📎 DART에서 추출됨</span>
+            <span class="pill-tag pill-tag--green"><span class="pdot"></span>신뢰도 높음</span>
+            <button class="btn btn--sm" id="asmReset">↺ 초기화</button>
+            <button class="btn btn--sm" onclick="toast('DART 재파싱')">↻ DART 새로고침</button>
+          </div>
+        </div>
+
+        <!-- 3-value cards -->
+        <div class="nav-cards" style="margin-bottom:14px">
+          <div class="nav-card"><div class="nav-l">보수적 (Low)</div><div class="nav-v"><span id="navLow">—</span><span class="nav-u">억원</span></div><div class="nav-note">청산가치 · 즉시 처분 가정</div></div>
+          <div class="nav-card nav-card--base"><div class="nav-l">기준 (Base) · NAV</div><div class="nav-v"><span id="navBase">—</span><span class="nav-u">억원</span></div><div class="nav-note">총자산 장부가치 − 총부채</div></div>
+          <div class="nav-card"><div class="nav-l">낙관적 (High)</div><div class="nav-v"><span id="navHigh">—</span><span class="nav-u">억원</span></div><div class="nav-note">재조달원가 기준</div></div>
+        </div>
+
+        <!-- 2-column: 가정 | NAV 빌드업 (only these two, same height) -->
+        <div class="iwa-2col">
+
+          <!-- 왼쪽: 가정 -->
+          <div class="iwa-assume">
+            <div class="iwa-assume__head">
+              <span class="iwa-assume__title">가정</span>
+              <span class="pill-tag" style="font-size:10px;padding:2px 8px">슬라이더 조정 가능</span>
+            </div>
+            <div class="iwa-assume__body">
+
+              <div class="iwa-slider-row">
+                <div class="iwa-slider-row__top">
+                  <span class="iwa-slider-row__label">유동자산 <span class="iwa-slider-row__meta">DART 재무상태표</span></span>
+                  <span class="iwa-slider-row__val"><span id="outCurr">32</span><span class="iwa-slider-row__sub"> 억원</span></span>
+                </div>
+                <input id="inCurr" type="range" min="0" max="300" value="32" step="1" style="width:100%"/>
+              </div>
+
+              <div class="iwa-slider-row">
+                <div class="iwa-slider-row__top">
+                  <span class="iwa-slider-row__label">투자자산 <span class="iwa-slider-row__meta">DART 재무상태표</span></span>
+                  <span class="iwa-slider-row__val"><span id="outInv">8</span><span class="iwa-slider-row__sub"> 억원</span></span>
+                </div>
+                <input id="inInv" type="range" min="0" max="200" value="8" step="1" style="width:100%"/>
+              </div>
+
+              <div class="iwa-slider-row">
+                <div class="iwa-slider-row__top">
+                  <span class="iwa-slider-row__label">총부채 <span class="iwa-slider-row__meta">DART 재무상태표</span></span>
+                  <span class="iwa-slider-row__val"><span id="outDebt">50</span><span class="iwa-slider-row__sub"> 억원</span></span>
+                </div>
+                <input id="inDebt" type="range" min="0" max="600" value="50" step="10" style="width:100%"/>
+              </div>
+
+              <div style="border-top:1px solid var(--oc-border);margin:4px 0"></div>
+
+              <div class="iwa-slider-row">
+                <div class="iwa-slider-row__top">
+                  <span class="iwa-slider-row__label">청산계수 <span class="iwa-slider-row__meta">Low 시나리오</span></span>
+                  <span class="iwa-slider-row__val"><span id="outLiq">80</span><span class="iwa-slider-row__sub">%</span></span>
+                </div>
+                <input id="inLiq" type="range" min="40" max="100" value="80" step="5" style="width:100%"/>
+              </div>
+
+              <div class="iwa-slider-row">
+                <div class="iwa-slider-row__top">
+                  <span class="iwa-slider-row__label">재조달계수 <span class="iwa-slider-row__meta">High 시나리오</span></span>
+                  <span class="iwa-slider-row__val"><span id="outRep">130</span><span class="iwa-slider-row__sub">%</span></span>
+                </div>
+                <input id="inRep" type="range" min="100" max="200" value="130" step="5" style="width:100%"/>
+              </div>
+
+            </div>
+            <div class="iwa-assume__footer">
+              슬라이더 조정 시 즉시 NAV 재계산 · 기준연도 <b>2025</b> · 정액상각법
+            </div>
+          </div>
+
+          <!-- 오른쪽: NAV 빌드업 (height:100% fills the column) -->
+          <div class="iwa-buildup">
+            <div class="iwa-buildup__head">
+              <span class="iwa-buildup__title">NAV 빌드업</span>
+              <span class="iwa-buildup__unit">단위 억원 · 기준연도 2025</span>
+            </div>
+            <table style="flex:1">
+              <tbody>
+                <tr><td class="iwa-buildup__label">고정자산 취득원가</td><td class="iwa-buildup__val" id="bu-cost">—</td><td class="iwa-buildup__src"><span class="iwa-buildup__src-tag iwa-buildup__src-tag--dart">📎 DART</span></td></tr>
+                <tr><td class="iwa-buildup__label" style="padding-left:26px">− 감가상각 누계</td><td class="iwa-buildup__val" id="bu-depr" style="color:var(--oc-fg-muted)">—</td><td class="iwa-buildup__src"><span class="iwa-buildup__src-tag iwa-buildup__src-tag--auto">✦ 자동</span></td></tr>
+                <tr class="row--result"><td class="iwa-buildup__label">= 고정자산 장부가치</td><td class="iwa-buildup__val" id="bu-book">—</td><td></td></tr>
+                <tr><td class="iwa-buildup__label">+ 유동자산</td><td class="iwa-buildup__val" id="bu-curr">—</td><td class="iwa-buildup__src"><span class="iwa-buildup__src-tag iwa-buildup__src-tag--dart">📎 DART</span></td></tr>
+                <tr><td class="iwa-buildup__label">+ 투자자산</td><td class="iwa-buildup__val" id="bu-inv">—</td><td class="iwa-buildup__src"><span class="iwa-buildup__src-tag iwa-buildup__src-tag--dart">📎 DART</span></td></tr>
+                <tr class="row--result"><td class="iwa-buildup__label">= 총자산 (조정)</td><td class="iwa-buildup__val" id="bu-total">—</td><td></td></tr>
+                <tr><td class="iwa-buildup__label" style="padding-left:26px">− 총부채</td><td class="iwa-buildup__val" id="bu-debt" style="color:var(--oc-fg-muted)">—</td><td class="iwa-buildup__src"><span class="iwa-buildup__src-tag iwa-buildup__src-tag--dart">📎 DART</span></td></tr>
+                <tr class="row--nav"><td class="iwa-buildup__label" style="font-weight:800;color:var(--oc-navy)">= NAV (Base)</td><td class="iwa-buildup__val" id="bu-nav">—</td><td></td></tr>
+              </tbody>
+            </table>
+            <div class="iwa-buildup__footer">
+              <span style="font-size:10px;color:var(--oc-fg-faint);font-weight:700">출처:</span>
+              <span class="iwa-buildup__src-tag iwa-buildup__src-tag--dart">📎 DART 연결</span>
+              <span class="iwa-buildup__src-tag iwa-buildup__src-tag--auto">✦ 자동 산출</span>
+              <span class="iwa-buildup__src-tag iwa-buildup__src-tag--manual">✏ 수동 입력</span>
+            </div>
+          </div>
+
+        </div><!-- /2col -->
+
+        <!-- 자산 구성 바 — full width, thin strip -->
+        <div class="iwa-compose-strip">
+          <span style="font-size:11px;font-weight:700;color:var(--oc-fg-muted);white-space:nowrap">고정자산 구성</span>
+          <div class="iwa-compose-strip__bar" id="iwaComposeBar"></div>
+          <div class="iwa-compose-strip__legend" id="iwaComposeLegend"></div>
+          <span id="iwaComposeSub" style="font-size:10.5px;color:var(--oc-fg-faint);white-space:nowrap;margin-left:4px"></span>
+        </div>
+
+        <!-- 자산 명세 — full width -->
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--oc-border)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:13px;font-weight:800;color:var(--oc-navy)">고정자산 명세</span>
+              <span id="assetCountBadge" style="font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:9px;background:var(--oc-blue-tint);color:var(--oc-blue)">0건</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button id="btnAdd" class="btn btn--sm" style="display:none">＋ 자산 추가</button>
+              <button id="assetEditBtn" class="btn btn--sm" style="min-width:64px">✏ 편집</button>
+              <button id="assetCancelBtn" class="btn btn--sm" style="display:none">취소</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="iwa-tbl">
               <thead>
-                <tr class="[&>th]:text-[9.5px] [&>th]:font-extrabold [&>th]:tracking-[0.06em] [&>th]:uppercase [&>th]:text-oc-muted [&>th]:px-3.5 [&>th]:py-2 [&>th]:border-b [&>th]:border-oc-border [&>th]:bg-oc-s2 [&>th]:whitespace-nowrap">
-                  <th class="text-left">자산명</th>
-                  <th class="text-left">분류</th>
-                  <th class="text-right">취득원가</th>
-                  <th class="text-center">내용연수 / 경과</th>
-                  <th class="text-right">감가상각 누계</th>
-                  <th class="text-right">장부가치</th>
-                  <th class="text-left">출처</th>
+                <tr>
+                  <th>자산명</th>
+                  <th>종류</th>
+                  <th class="r">취득원가<br/><span style="font-weight:500;letter-spacing:0;text-transform:none;color:var(--oc-fg-faint)">(억원)</span></th>
+                  <th style="text-align:center">취득연도</th>
+                  <th style="text-align:center">내용연수</th>
+                  <th class="r">감가상각</th>
+                  <th class="r">장부가치</th>
+                  <th>출처</th>
                   <th></th>
                 </tr>
               </thead>
-              <tbody id="tbl-body"></tbody>
-              <tfoot id="tbl-foot"></tfoot>
+              <tbody id="assetTbody"></tbody>
+              <tfoot id="assetTfoot"></tfoot>
             </table>
           </div>
+          <div style="padding:8px 16px;border-top:1px solid var(--oc-border);background:var(--oc-surface-2);font-size:10.5px;color:var(--oc-fg-muted)" id="ulNote">내용연수 로드 중…</div>
         </div>
 
-        <!-- NAV 산출 분해 -->
-        <div class="bg-white border border-oc-border rounded-xl p-4 mb-4">
-          <h3 class="m-0 mb-3 text-[13px] font-extrabold text-oc-navy">NAV 산출 분해</h3>
-          <div class="grid grid-cols-[1fr_auto] gap-x-8 gap-y-1.5 text-[12.5px]">
-            <span class="text-oc-fg">총 취득원가 (Gross Asset Value)</span>
-            <span id="d-cost" class="text-right tabular-nums font-bold text-oc-navy">—</span>
-            <span class="text-oc-muted pl-3">− 감가상각 누계</span>
-            <span id="d-depr" class="text-right tabular-nums text-oc-muted">—</span>
-            <div class="col-span-2 border-t border-oc-border my-1"></div>
-            <span class="font-bold text-oc-fg">= 자산 순가치 (Net Asset)</span>
-            <span id="d-book" class="text-right tabular-nums font-bold text-oc-navy">—</span>
-            <span class="text-oc-muted pl-3">− 총부채</span>
-            <span id="d-debt" class="text-right tabular-nums text-oc-muted">—</span>
-            <div class="col-span-2 border-t border-oc-border my-1"></div>
-            <span class="font-extrabold text-oc-navy bg-oc-blue-tint -mx-2 px-2 py-1.5 rounded">= 순자산가치 NAV (Base)</span>
-            <span id="d-nav" class="text-right tabular-nums font-extrabold text-oc-navy bg-oc-blue-tint -mx-2 px-2 py-1.5 rounded">—</span>
-          </div>
+        <!-- 공유 바 -->
+        <div class="iwa-share-bar">
+          <span style="font-size:11.5px;color:var(--oc-fg-muted)">이 평가 결과를 투자사에 공유하면 열람 권한이 부여된 멤버에게 노출됩니다.</span>
+          <button class="btn btn--pri" onclick="toast('투자사에 공유됨')">✓ 투자사에 공유됨</button>
         </div>
 
-        <!-- 출처 -->
-        <div>
-          <h4 class="m-0 mb-2 text-[10px] font-extrabold tracking-[0.08em] uppercase text-oc-faint">출처</h4>
-          <ul class="list-none m-0 p-0 flex flex-col gap-1.5">
-            <li class="flex items-center gap-2.5 text-[11.5px] px-3 py-2 bg-white border border-oc-border rounded-lg">
-              <span class="font-bold text-oc-navy">📄 감정평가서_2024.pdf</span>
-              <span class="text-oc-muted ml-auto">p.3 자산 취득원가·평가금액</span>
-            </li>
-            <li class="flex items-center gap-2.5 text-[11.5px] px-3 py-2 bg-white border border-oc-border rounded-lg">
-              <span class="font-bold text-oc-navy">📄 재무제표_FY2025.xlsx</span>
-              <span class="text-oc-muted ml-auto">Sheet '유형자산' · 취득원가·감가상각 명세</span>
-            </li>
-            <li class="flex items-center gap-2.5 text-[11.5px] px-3 py-2 bg-white border border-oc-border rounded-lg">
-              <span class="font-bold text-oc-navy">📄 선박담보대출_계약서.pdf</span>
-              <span class="text-oc-muted ml-auto">부채 잔액 확인</span>
-            </li>
-          </ul>
+      </div>
+
+      <!-- ══ DCF ══ -->
+      <div class="view" data-view="tpl-dcf">
+        <div class="panel" style="color:var(--oc-fg-muted);font-size:13px;padding:40px;text-align:center">
+          <div style="font-size:32px;margin-bottom:12px">💹</div>
+          <div style="font-size:15px;font-weight:800;color:var(--oc-navy);margin-bottom:8px">DCF 상세 모델 — 개발 예정</div>
+          <div>DART 재무제표 연동 후 5개년 FCF / WACC / Terminal Value 자동 산출</div>
         </div>
-      </section>
+      </div>
+
+      <!-- ══ Team Score ══ -->
+      <div class="view" data-view="tpl-ts">
+        <div class="panel" style="color:var(--oc-fg-muted);font-size:13px;padding:40px;text-align:center">
+          <div style="font-size:32px;margin-bottom:12px">👥</div>
+          <div style="font-size:15px;font-weight:800;color:var(--oc-navy);margin-bottom:8px">Team Score — 개발 예정</div>
+          <div>Biyard 5-factor (TB 25% · CP 25% · EG 20% · CT 15% · MR 15%) 자동 산정</div>
+        </div>
+      </div>
+
+      <!-- ══ 검토 ══ -->
+      <div class="view" data-view="reviews">
+        <div class="panel" style="color:var(--oc-fg-muted);font-size:13px;padding:40px;text-align:center">검토 요청 목록 — 개발 예정</div>
+      </div>
+
     </div>
+  </div>
+</main>
+</div><!-- app -->
 
-    <!-- 데모 버튼 -->
-    <div class="flex items-center gap-2 mt-6 pt-4 border-t border-dashed border-oc-border-strong text-[11px] text-oc-faint">
-      <span>mock 데모:</span>
-      <button id="demo-re" class="bg-white border border-oc-border px-2.5 py-1 rounded-full text-[11.5px] font-semibold text-oc-muted hover:text-oc-navy hover:border-oc-border-strong">부동산 시나리오 로드</button>
-      <button id="demo-clear" class="bg-white border border-oc-border px-2.5 py-1 rounded-full text-[11.5px] font-semibold text-oc-muted hover:text-oc-navy hover:border-oc-border-strong">자산 비우기</button>
-    </div>
-
-  </main>
+<!-- loading -->
+<div class="loading-ov" id="loadingOv">
+  <div class="spinner"></div>
+  <p id="loadingMsg" style="font-size:14px;font-weight:700;color:var(--oc-navy)">불러오는 중…</p>
 </div>
+
+<!-- 자산 추가 모달 -->
+<div class="modal-ov" id="modalOv">
+  <div class="modal-box">
+    <div class="modal-head">자산 수동 추가<button class="modal-x" id="modalClose">✕</button></div>
+    <div class="modal-body">
+      <div style="padding:8px 10px;background:var(--oc-warn-tint);border-radius:8px;font-size:11.5px;color:var(--oc-warn);font-weight:600">⚠ 수동 입력 자산은 공식 서류로 검증되지 않아 '수동입력' 배지가 표시됩니다.</div>
+      <div class="modal-lbl">자산명 *</div>
+      <input class="modal-inp" id="mName" placeholder="예: 제주 태양광 발전소 3호기"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div class="modal-lbl">대분류 *</div><select class="modal-sel" id="mClass"><option>유형자산</option><option>무형자산</option><option>생물자산</option><option>투자부동산</option></select></div>
+        <div><div class="modal-lbl">자산 종류 *</div><select class="modal-sel" id="mType"></select></div>
+      </div>
+      <div class="modal-row">
+        <div><div class="modal-lbl">취득원가(억원) *</div><input class="modal-inp" id="mCost" type="number" min="0" step="0.1" placeholder="0.0"/></div>
+        <div><div class="modal-lbl">취득연도 *</div><input class="modal-inp" id="mYear" type="number" min="1990" max="2025" placeholder="2020"/></div>
+        <div><div class="modal-lbl">내용연수</div><input class="modal-inp" id="mUl" type="number" min="0" placeholder="자동"/></div>
+      </div>
+      <div><div class="modal-lbl">출처 문서 (근거 서류명)</div><input class="modal-inp" id="mSrc" placeholder="예: 감정평가 보고서 2025-03"/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="modalCancel">취소</button>
+      <button class="btn btn--pri" id="modalSave">추가</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
 
 <script>
 (function(){
-  "use strict";
-  var DEFAULTS={liq:80,rep:130,debt:40,sector:'ship'};
-  var USEFUL_LIFE={
-    ship:{선박:20,기자재:10,기타유형:10},
-    realestate:{건물:40,토지:0,시설물:15,기타유형:10},
-    software:{소프트웨어:5,서버및인프라:5,특허및IP:10,사무용비품:5,기타유형:5},
-    poultry:{계사건물:20,토지:0,사육설비:10,냉동냉장설비:10,차량운반구:5,기타유형:5,산란계:2.5,종계:1.5,육계:0},
-    renewable:{태양광패널:25,풍력터빈:25,ESS배터리:10,인버터:10,송전설비:20,토지:0,기타유형:10},
-  };
-  var CY=2025;
-  var SAMPLE_ASSETS={
-    ship:[
-      {id:1,name:'주력 선박 (1호)',cat:'선박',cost:100,acq:2019,land:false,src:'감정평가서_2024.pdf · p.3'},
-      {id:2,name:'보조 기자재',cat:'기자재',cost:18,acq:2021,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-      {id:3,name:'항만 부지',cat:'기타유형',cost:25,acq:2015,land:true,src:'등기부등본 · 취득가액'},
-    ],
-    realestate:[
-      {id:1,name:'강남 오피스 건물',cat:'건물',cost:200,acq:2010,land:false,src:'감정평가서_2024.pdf · p.3'},
-      {id:2,name:'부지 (토지)',cat:'토지',cost:80,acq:2010,land:true,src:'등기부등본 · 취득가액'},
-      {id:3,name:'주차장 시설물',cat:'시설물',cost:15,acq:2018,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-    ],
-    software:[
-      {id:1,name:'핵심 SaaS 플랫폼',cat:'소프트웨어',cost:30,acq:2021,land:false,src:'무형자산명세서_FY2025.xlsx'},
-      {id:2,name:'서버·클라우드 인프라',cat:'서버및인프라',cost:12,acq:2022,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-      {id:3,name:'특허 3건',cat:'특허및IP',cost:8,acq:2020,land:false,src:'특허등록원부 · 취득가액'},
-      {id:4,name:'사무용 비품',cat:'사무용비품',cost:3,acq:2023,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-    ],
-    poultry:[
-      {id:1,name:'계사 건물 (3동)',cat:'계사건물',cost:25,acq:2015,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-      {id:2,name:'농장 부지',cat:'토지',cost:20,acq:2015,land:true,src:'등기부등본 · 취득가액'},
-      {id:3,name:'자동 사육설비',cat:'사육설비',cost:18,acq:2018,land:false,src:'설비도입계약서_2018.pdf'},
-      {id:4,name:'냉동·냉장 창고',cat:'냉동냉장설비',cost:10,acq:2020,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-      {id:5,name:'냉장 운반 차량',cat:'차량운반구',cost:5,acq:2022,land:false,src:'차량등록증 · 취득가액'},
-      {id:6,name:'산란계 (15,000수)',cat:'산란계',cost:4.5,acq:2024,land:false,bio:true,src:'생물자산명세서_FY2025.xlsx · 산란계'},
-      {id:7,name:'종계 (2,000수)',cat:'종계',cost:2.0,acq:2025,land:false,bio:true,src:'생물자산명세서_FY2025.xlsx · 종계'},
-      {id:8,name:'육계 (30,000수)',cat:'육계',cost:3.0,acq:2025,land:false,bio:true,fair:true,src:'생물자산명세서_FY2025.xlsx · 육계'},
-    ],
-    renewable:[
-      {id:1,name:'태양광 패널 (100MW)',cat:'태양광패널',cost:150,acq:2020,land:false,src:'설비도입계약서_2020.pdf · 취득원가'},
-      {id:2,name:'풍력터빈 (5기)',cat:'풍력터빈',cost:80,acq:2021,land:false,src:'감정평가서_2024.pdf · p.5'},
-      {id:3,name:'ESS 배터리 시스템',cat:'ESS배터리',cost:30,acq:2022,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-      {id:4,name:'인버터·전력변환장치',cat:'인버터',cost:15,acq:2020,land:false,src:'재무제표_FY2025.xlsx · 유형자산'},
-      {id:5,name:'송전·계통연계 설비',cat:'송전설비',cost:20,acq:2020,land:false,src:'설비도입계약서_2020.pdf · 송전설비'},
-      {id:6,name:'발전소 부지',cat:'토지',cost:25,acq:2019,land:true,src:'등기부등본 · 취득가액'},
-    ],
-  };
-  var assets=SAMPLE_ASSETS.ship.map(function(a){return Object.assign({},a);});
-  var nextId=4;
+"use strict";
+var CY = 2025;
 
-  function fmt(x){
-    if(x===null||x===undefined||isNaN(x))return'—';
-    return x.toLocaleString('ko-KR',{minimumFractionDigits:1,maximumFractionDigits:1});
+var ASSET_TYPES = {
+  "선박":{cls:"유형자산",ul:20},"선박기자재":{cls:"유형자산",ul:10},
+  "건물":{cls:"유형자산",ul:40},"구축물":{cls:"유형자산",ul:15},
+  "기계장치":{cls:"유형자산",ul:10},"차량운반구":{cls:"유형자산",ul:5},
+  "공구기구비품":{cls:"유형자산",ul:5},"태양광패널":{cls:"유형자산",ul:25},
+  "풍력터빈":{cls:"유형자산",ul:25},"ESS배터리":{cls:"유형자산",ul:10},
+  "인버터":{cls:"유형자산",ul:10},"송전설비":{cls:"유형자산",ul:20},
+  "토지":{cls:"유형자산",ul:0},
+  "소프트웨어":{cls:"무형자산",ul:5},"특허권":{cls:"무형자산",ul:10},
+  "상표권":{cls:"무형자산",ul:10},"개발비":{cls:"무형자산",ul:5},"라이선스":{cls:"무형자산",ul:5},
+  "육계":{cls:"생물자산",ul:1},"종계":{cls:"생물자산",ul:3},"양식어류":{cls:"생물자산",ul:3},
+  "임대건물":{cls:"투자부동산",ul:40},"임대토지":{cls:"투자부동산",ul:0},
+};
+var TYPES_BY_CLS = {};
+Object.keys(ASSET_TYPES).forEach(function(k){
+  var c = ASSET_TYPES[k].cls;
+  (TYPES_BY_CLS[c] = TYPES_BY_CLS[c]||[]).push(k);
+});
+
+// 서류 정의
+var DOC_DEFS = [
+  // 자동
+  {id:"dart-pp",  group:"dart", icon:"📋", name:"유형자산명세서",      org:"금융감독원 DART",  srcType:"dart",    desc:"취득원가·감가상각·장부가치 자동 파싱",   evalModel:"IWA 자산원가", autoFetch:true},
+  {id:"dart-bs",  group:"dart", icon:"📊", name:"재무상태표",          org:"금융감독원 DART",  srcType:"dart",    desc:"총부채·자산총계 자동 파싱",              evalModel:"IWA / DCF", autoFetch:true},
+  {id:"dart-ar",  group:"dart", icon:"📰", name:"감사보고서",          org:"금융감독원 DART",  srcType:"dart",    desc:"외부감사 완료 재무제표 원본",            evalModel:"DCF", autoFetch:true},
+  // 업로드
+  {id:"hometax",  group:"upload", icon:"🧾", name:"표준재무제표증명원", org:"국세청 홈택스",    srcType:"hometax", desc:"법인세 신고 기반 비상장사 재무제표",      evalModel:"DCF"},
+  {id:"registry", group:"upload", icon:"🏛", name:"등기사항전부증명서", org:"법원 등기소",      srcType:"registry",desc:"부동산 소유 확인 및 취득원가 교차 검증",  evalModel:"IWA 보조"},
+  {id:"appraisal",group:"upload", icon:"📝", name:"감정평가보고서",     org:"감정평가법인",     srcType:"appraisal",desc:"특수자산 공정가치 산출 보고서",           evalModel:"IWA 보조"},
+  // 미등록
+  {id:"kipris",   group:"miss",  icon:"💡", name:"특허·상표권 등록증", org:"특허청 KIPRIS",   srcType:"kipris",  desc:"무형자산 존재·등록일 확인 (API 무료)",   evalModel:"IWA 무형자산"},
+  {id:"pubprice", group:"miss",  icon:"🌏", name:"표준지공시지가",     org:"국토교통부",       srcType:"dart",    desc:"토지 재조달원가 자동 갱신 (API 무료)",   evalModel:"IWA 토지"},
+  {id:"taxinv",   group:"miss",  icon:"📥", name:"부가세 신고내역",   org:"국세청 홈택스",    srcType:"hometax", desc:"매출 데이터 검증",                        evalModel:"DCF 보조"},
+];
+
+// 서류 상태 (데모)
+var DOC_STATUS = {
+  "dart-pp": {status:"auto",   extractedAssets:5, date:"2025-12-31"},
+  "dart-bs": {status:"auto",   extractedAssets:0, date:"2025-12-31"},
+  "dart-ar": {status:"auto",   extractedAssets:0, date:"2025-12-31"},
+  "hometax": {status:"miss",   extractedAssets:0, date:null},
+  "registry":{status:"warn",   extractedAssets:0, date:null},
+  "appraisal":{status:"miss",  extractedAssets:0, date:null},
+  "kipris":  {status:"miss",   extractedAssets:0, date:null},
+  "pubprice":{status:"miss",   extractedAssets:0, date:null},
+  "taxinv":  {status:"miss",   extractedAssets:0, date:null},
+};
+
+var COMPANIES = {
+  "co-a":{
+    name:"주식회사 A",ava:"A",type:"회사 · 일반 법인",
+    grad:"linear-gradient(135deg,#1D4ED8,#6D3FC4)",dot:"#1D4ED8",defaultDebt:45,
+    assets:[
+      {name:"본사 사옥",           type:"건물",        cost:85, acq:2015,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"사업장 부지",         type:"토지",        cost:40, acq:2015,src:"등기사항전부증명서",    srcType:"registry"},
+      {name:"주차장·구내도로",     type:"구축물",      cost:8,  acq:2015,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"생산 설비",           type:"기계장치",    cost:30, acq:2019,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"업무용 차량 (3대)",   type:"차량운반구",  cost:6,  acq:2022,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"사무용 비품·IT기기",  type:"공구기구비품",cost:4,  acq:2023,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"ERP 시스템",          type:"소프트웨어",  cost:5,  acq:2020,src:"홈택스 표준재무제표",  srcType:"hometax"},
+    ]
+  },
+  "co-b":{
+    name:"주식회사 B",ava:"B",type:"회사 · 일반 법인",
+    grad:"linear-gradient(135deg,#0E7C8A,#138A5A)",dot:"#0E7C8A",defaultDebt:28,
+    assets:[
+      {name:"임차 보증금 (사무실)", type:"건물",        cost:12, acq:2021,src:"홈택스 표준재무제표",  srcType:"hometax"},
+      {name:"업무용 차량 (2대)",    type:"차량운반구",  cost:4,  acq:2023,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"서버·네트워크 장비",   type:"기계장치",    cost:8,  acq:2022,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"사무용 비품",          type:"공구기구비품",cost:2,  acq:2021,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"자체 개발 소프트웨어", type:"소프트웨어",  cost:15, acq:2020,src:"DART · 무형자산명세서",srcType:"dart"},
+      {name:"핵심 기술 특허권",     type:"특허권",      cost:10, acq:2019,src:"특허청 KIPRIS",        srcType:"kipris"},
+    ]
+  },
+  "co-c":{
+    name:"주식회사 C",ava:"C",type:"회사 · 일반 법인",
+    grad:"linear-gradient(135deg,#B5780C,#D97706)",dot:"#B5780C",defaultDebt:120,
+    assets:[
+      {name:"본사 건물",           type:"건물",        cost:180,acq:2012,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"본사 토지",           type:"토지",        cost:95, acq:2012,src:"등기사항전부증명서",    srcType:"registry"},
+      {name:"창고·물류센터",       type:"건물",        cost:60, acq:2018,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"물류센터 부지",        type:"토지",        cost:45, acq:2018,src:"등기사항전부증명서",    srcType:"registry"},
+      {name:"생산 기계류",          type:"기계장치",    cost:35, acq:2020,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"업무용 차량 (5대)",   type:"차량운반구",  cost:10, acq:2021,src:"DART · 유형자산명세서",srcType:"dart"},
+    ]
+  },
+  "co-d":{
+    name:"주식회사 D",ava:"D",type:"회사 · 일반 법인",
+    grad:"linear-gradient(135deg,#6D3FC4,#B5780C)",dot:"#6D3FC4",defaultDebt:8,
+    assets:[
+      {name:"사무용 비품·IT기기",  type:"공구기구비품",cost:3,  acq:2022,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"업무용 차량 (1대)",   type:"차량운반구",  cost:2,  acq:2023,src:"DART · 유형자산명세서",srcType:"dart"},
+      {name:"플랫폼 소프트웨어",   type:"소프트웨어",  cost:20, acq:2021,src:"DART · 무형자산명세서",srcType:"dart"},
+      {name:"서비스 개발비",        type:"개발비",      cost:12, acq:2023,src:"홈택스 표준재무제표",  srcType:"hometax"},
+      {name:"브랜드 상표권",        type:"상표권",      cost:5,  acq:2020,src:"특허청 KIPRIS",        srcType:"kipris"},
+    ]
+  },
+};
+var CO_ORDER = ["co-a","co-b","co-c","co-d"];
+
+var curKey = "green-energy";
+var assets = [];
+var nextId = 1;
+
+// DOM refs
+var inLiq = document.getElementById("inLiq");
+var inRep = document.getElementById("inRep");
+var inDebt = document.getElementById("inDebt");
+var inCurr = document.getElementById("inCurr");
+var inInv = document.getElementById("inInv");
+var outLiq = document.getElementById("outLiq");
+var outRep = document.getElementById("outRep");
+var outDebt = document.getElementById("outDebt");
+var outCurr = document.getElementById("outCurr");
+var outInv = document.getElementById("outInv");
+var loadingOv = document.getElementById("loadingOv");
+var loadingMsg = document.getElementById("loadingMsg");
+
+// utils
+function fmt(x){
+  if(x===null||x===undefined||isNaN(x))return"—";
+  return x.toLocaleString("ko-KR",{minimumFractionDigits:1,maximumFractionDigits:1});
+}
+function getUL(type,custom){
+  if(custom!==null&&custom!==undefined&&!isNaN(custom))return custom;
+  return (ASSET_TYPES[type]||{ul:10}).ul;
+}
+function calcBook(a){
+  var ul=getUL(a.type,a.customUL),depr=0;
+  if(ul>0) depr=Math.min(a.cost,a.cost*((CY-a.acq)/ul));
+  return Math.max(0,a.cost-depr);
+}
+function calcDepr(a){return Math.max(0,a.cost-calcBook(a));}
+
+var CLS_BADGE = {"유형자산":"cls-tangible","무형자산":"cls-intangible","생물자산":"cls-bio","투자부동산":"cls-invest"};
+var SRC_BADGE = {"dart":"src-dart","hometax":"src-hometax","registry":"src-registry","kipris":"src-kipris","appraisal":"src-appraisal","manual":"src-manual"};
+var SRC_LABEL = {"dart":"DART","hometax":"홈택스","registry":"등기소","kipris":"특허청","appraisal":"감정평가","manual":"수동입력"};
+
+function computeNAV(){
+  var liq=+inLiq.value, rep=+inRep.value, debt=+inDebt.value;
+  var curr=(inCurr?+inCurr.value:0), inv=(inInv?+inInv.value:0);
+  var tC=0,tB=0,tR=0;
+  assets.forEach(function(a){
+    var ul=getUL(a.type,a.customUL);
+    tC+=a.cost; tB+=calcBook(a);
+    tR+=(ul===0)?a.cost:a.cost*(rep/100);
+  });
+  var totalAdj=tB+curr+inv;
+  return{tC:tC,tB:tB,tR:tR,curr:curr,inv:inv,totalAdj:totalAdj,
+    base:totalAdj-debt,low:tB*(liq/100)+curr+inv-debt,high:tR+curr+inv-debt,debt:debt};
+}
+
+// ── 서류 카드 렌더 ──
+function renderDocCards(){
+  var dartEl=document.getElementById("dartCards");
+  var uploadEl=document.getElementById("uploadCards");
+  var missEl=document.getElementById("missCards");
+  if(!dartEl)return;
+
+  function makeCard(def){
+    var st=DOC_STATUS[def.id]||{status:"miss"};
+    var isMiss=st.status==="miss";
+    var stLabel={"auto":"자동 연동","ok":"업로드됨","warn":"확인 필요","miss":"미등록"}[st.status]||"미등록";
+    var stCls={"auto":"st-auto","ok":"st-ok","warn":"st-warn","miss":"st-miss"}[st.status]||"st-miss";
+    var barColor={"auto":"#1D4ED8","ok":"#138A5A","warn":"#B5780C","miss":"#E4E8F0"}[st.status]||"#E4E8F0";
+    var badgeCls=SRC_BADGE[def.srcType]||"src-manual";
+
+    var assetsNote = st.extractedAssets>0
+      ? '<b>'+st.extractedAssets+'개</b> 자산 추출됨'
+      : (isMiss ? '등록 시 자산 추출 가능' : '자산 파싱 없음');
+
+    var action = isMiss
+      ? (def.autoFetch ? '<span style="color:var(--oc-blue);font-size:11px;font-weight:700;cursor:pointer" onclick="toast(\''+def.name+' 자동 연동\')">자동 연동 →</span>'
+                       : '<span style="color:var(--oc-blue);font-size:11px;font-weight:700;cursor:pointer" onclick="toast(\''+def.name+' 업로드\')">업로드 →</span>')
+      : '<span style="color:var(--oc-fg-muted);font-size:11px;cursor:pointer" onclick="toast(\''+def.name+' 원본 보기\')">원본 보기</span>';
+
+    return '<button class="doc-card'+(isMiss?' doc-card--miss':'')+' fade-in" onclick="toast(\''+def.name+'\')">'+
+      '<div class="doc-card__bar" style="background:'+barColor+'"></div>'+
+      '<div class="doc-card__body">'+
+        '<div class="doc-card__top">'+
+          '<div class="doc-card__ic" style="background:var(--oc-surface-2)">'+def.icon+'</div>'+
+          '<div style="flex:1">'+
+            '<div style="display:flex;align-items:center;gap:6px">'+
+              '<div class="doc-card__name">'+def.name+'</div>'+
+              '<span class="'+stCls+' doc-slot__st">'+stLabel+'</span>'+
+            '</div>'+
+            '<div class="doc-card__org">'+def.org+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--oc-fg-muted);margin-bottom:9px">'+def.desc+'</div>'+
+        '<div style="display:flex;gap:5px;align-items:center;margin-bottom:8px">'+
+          '<span style="font-size:10px;color:var(--oc-fg-faint)">연동 모델:</span>'+
+          '<span style="font-size:10px;font-weight:700;color:var(--oc-navy)">'+def.evalModel+'</span>'+
+        '</div>'+
+        '<div class="doc-card__foot">'+
+          '<span class="doc-card__assets">'+assetsNote+'</span>'+
+          action+
+        '</div>'+
+      '</div>'+
+    '</button>';
   }
-  function getUL(cat,sector,land){
-    if(land)return 0;
-    var m=USEFUL_LIFE[sector]||USEFUL_LIFE.ship;
-    return m[cat]||10;
+
+  dartEl.innerHTML = DOC_DEFS.filter(d=>d.group==="dart").map(makeCard).join("") +
+    '<button class="doc-add-card" onclick="toast(\'DART 항목 추가\')"><span style="font-size:22px">+</span><span style="font-size:12px;font-weight:700">DART 항목 추가</span></button>';
+  uploadEl.innerHTML = DOC_DEFS.filter(d=>d.group==="upload").map(makeCard).join("") +
+    '<button class="doc-add-card" onclick="toast(\'서류 업로드\')"><span style="font-size:22px">+</span><span style="font-size:12px;font-weight:700">서류 업로드</span></button>';
+  missEl.innerHTML = DOC_DEFS.filter(d=>d.group==="miss").map(makeCard).join("");
+}
+
+// ── 개요 서류 트래커 ──
+var TRACK_ITEMS = [
+  {id:"dart-pp",  name:"유형자산명세서", icon:"📋", src:"DART"},
+  {id:"dart-bs",  name:"재무상태표",     icon:"📊", src:"DART"},
+  {id:"hometax",  name:"표준재무제표",   icon:"🧾", src:"홈택스"},
+  {id:"registry", name:"등기부등본",     icon:"🏛", src:"등기소"},
+  {id:"appraisal",name:"감정평가",       icon:"📝", src:"감정평가"},
+  {id:"kipris",   name:"특허등록증",     icon:"💡", src:"특허청"},
+  {id:"pubprice", name:"공시지가",       icon:"🌏", src:"국토부"},
+  {id:"taxinv",   name:"부가세신고",     icon:"📥", src:"홈택스"},
+];
+function renderDocTracker(){
+  var el=document.getElementById("docTrack");if(!el)return;
+  el.innerHTML = TRACK_ITEMS.map(function(t){
+    var st=DOC_STATUS[t.id]||{status:"miss"};
+    var cls={"auto":"doc-slot--auto","ok":"doc-slot--ok","warn":"doc-slot--warn","miss":"doc-slot--miss"}[st.status]||"doc-slot--miss";
+    var stLabel={"auto":"자동 연동","ok":"등록됨","warn":"확인필요","miss":"미등록"}[st.status]||"미등록";
+    var stCls={"auto":"st-auto","ok":"st-ok","warn":"st-warn","miss":"st-miss"}[st.status]||"st-miss";
+    return '<div class="doc-slot '+cls+'">'+
+      '<span class="doc-slot__ic">'+t.icon+'</span>'+
+      '<div><div class="doc-slot__name">'+t.name+'</div><div class="doc-slot__src">'+t.src+'</div></div>'+
+      '<span class="doc-slot__st '+stCls+'">'+stLabel+'</span>'+
+    '</div>';
+  }).join("");
+
+  var total=TRACK_ITEMS.length;
+  var done=TRACK_ITEMS.filter(t=>(DOC_STATUS[t.id]||{}).status!=="miss").length;
+  var pct=Math.round(done/total*100);
+  var pctEl=document.getElementById("ov-pct-num");
+  if(pctEl)pctEl.textContent=pct+"%";
+  var ovDocPct=document.getElementById("ov-doc-pct");
+  if(ovDocPct)ovDocPct.innerHTML=pct+'<small>%</small>';
+  var ovDocSub=document.getElementById("ov-doc-sub");
+  if(ovDocSub)ovDocSub.textContent=done+"개 등록 / "+total+"개 중";
+}
+
+// ── 자산 테이블 ──
+function renderAssetTable(){
+  var tbody=document.getElementById("assetTbody");
+  var tfoot=document.getElementById("assetTfoot");
+  if(!tbody)return;
+  if(!assets.length){
+    tbody.innerHTML='<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--oc-fg-muted)">자산 항목이 없습니다.</td></tr>';
+    if(tfoot)tfoot.innerHTML="";return;
   }
-  function calcDepr(a,sector){
-    if(a.land)return 0;
-    if(a.bio && a.fair)return 0; // 육계: 공정가치 기준 — 감가상각 없음
-    if(a.bio){
-      var ul=getUL(a.cat,sector,a.land);
-      if(!ul)return 0;
-      var elapsed=(CY-a.acq)+(new Date().getMonth()/12); // 월 단위 반영
-      return Math.min(a.cost, a.cost*(elapsed/ul));
-    }
-    var ul=getUL(a.cat,sector,a.land);
-    if(!ul)return 0;
-    return Math.min(a.cost,a.cost*((CY-a.acq)/ul));
-  }
-  function calcBook(a,sector){return Math.max(0,a.cost-calcDepr(a,sector));}
+  tbody.innerHTML=assets.map(function(a){
+    var ul=getUL(a.type,a.customUL),book=calcBook(a),elapsed=CY-a.acq,isLand=(ul===0);
+    var cls=(ASSET_TYPES[a.type]||{cls:"유형자산"}).cls;
+    var srcCls=SRC_BADGE[a.srcType]||"src-manual";
+    var srcLbl=SRC_LABEL[a.srcType]||"수동입력";
+    var verCls=a.srcType==="manual"?"badge badge--danger":"badge badge--green";
+    var verLbl=a.srcType==="manual"?"미검증":"공식확인";
+    var typeOpts=Object.keys(ASSET_TYPES).map(t=>'<option'+(t===a.type?' selected':'')+'>'+t+'</option>').join("");
+    return '<tr class="fade-in">'+
+      '<td><input class="edit-inp rname" data-id="'+a.id+'" value="'+a.name.replace(/"/g,'&quot;')+'" title="클릭하여 수정"/><span class="edit-hint">✏</span></td>'+
+      '<td><select data-id="'+a.id+'" class="rtype type-sel">'+typeOpts+'</select></td>'+
+      '<td class="r"><input class="edit-inp cost-inp rcost" data-id="'+a.id+'" value="'+a.cost+'" type="number" min="0" step="0.1" title="클릭하여 수정"/></td>'+
+      '<td><input class="edit-inp year-inp ryear" data-id="'+a.id+'" value="'+a.acq+'" type="number" min="1990" max="2025" title="클릭하여 수정"/></td>'+
+      '<td style="text-align:center">'+(isLand?'<span style="font-size:11px;color:var(--oc-fg-faint)">감가없음</span>':'<span data-id="'+a.id+'" class="ul-cell rul">'+ul+'년</span>')+'</td>'+
+      '<td class="r" style="color:var(--oc-fg-muted)">'+fmt(a.cost-book)+'</td>'+
+      '<td class="r" style="font-weight:700;color:'+(book<=0?'var(--oc-danger)':'var(--oc-navy)')+'">'+fmt(book)+'</td>'+
+      '<td><span class="src-badge '+srcCls+'" onclick="toast(\''+a.src+'\')">'+srcLbl+'</span></td>'+
+      '<td><button data-id="'+a.id+'" class="rdel" style="font-size:10px;color:var(--oc-fg-faint);padding:2px 6px;border-radius:5px;border:1px solid transparent" onmouseover="this.style.color=\'var(--oc-danger)\'" onmouseout="this.style.color=\'var(--oc-fg-faint)\'">✕</button></td>'+
+    '</tr>';
+  }).join("");
 
-  function params(){
-    return{
-      sector:document.getElementById('in-sector').value,
-      liq:parseFloat(document.getElementById('in-liq').value),
-      rep:parseFloat(document.getElementById('in-rep').value),
-      debt:parseFloat(document.getElementById('in-debt').value),
-    };
-  }
-
-  function render(){
-    var p=params();
-
-    document.getElementById('out-liq').textContent=p.liq.toFixed(0)+'%';
-    document.getElementById('out-rep').textContent=p.rep.toFixed(0)+'%';
-    document.getElementById('out-debt').textContent=fmt(p.debt)+'억원';
-
-    var keys={liq:DEFAULTS.liq,rep:DEFAULTS.rep,debt:DEFAULTS.debt};
-    Object.keys(keys).forEach(function(k){
-      var changed=(p[k]!==keys[k]);
-      var out=document.getElementById('out-'+k);
-      var hint=document.getElementById('hint-'+k);
-      out.style.color=changed?'#B5780C':'#054DBA';
-      if(hint)hint.style.color=changed?'#B5780C':'';
+  tbody.querySelectorAll(".rdel").forEach(function(b){
+    b.onclick=function(){assets=assets.filter(a=>a.id!==+b.dataset.id);renderAll();};
+  });
+  tbody.querySelectorAll(".rtype").forEach(function(s){
+    s.onchange=function(){var a=assets.find(x=>x.id===+s.dataset.id);if(a){a.type=s.value;a.customUL=null;renderAll();}};
+  });
+  tbody.querySelectorAll(".rul").forEach(function(c){
+    c.onclick=function(){var a=assets.find(x=>x.id===+c.dataset.id);if(!a)return;
+      var v=prompt("내용연수(년) 수정",getUL(a.type,a.customUL));
+      if(v!==null&&!isNaN(+v)){a.customUL=+v;renderAll();}};
+  });
+  // 자산명 인라인 편집
+  tbody.querySelectorAll(".rname").forEach(function(inp){
+    inp.addEventListener("blur",function(){
+      var a=assets.find(x=>x.id===+inp.dataset.id);
+      if(a&&inp.value.trim()){a.name=inp.value.trim();renderAll();}
     });
-
-    var banner=document.getElementById('miss-banner');
-    if(assets.length===0){
-      banner.style.display='flex';
-      ['nav-low','nav-base','nav-high'].forEach(function(id){document.getElementById(id).textContent='—';});
-      document.getElementById('tbl-body').innerHTML='<tr><td colspan="8" style="padding:24px;text-align:center;color:#9AA6BF;font-size:12px;">자산 항목이 없습니다. + 자산 추가 버튼으로 입력하세요.</td></tr>';
-      document.getElementById('tbl-foot').innerHTML='';
-      ['d-cost','d-depr','d-book','d-debt','d-nav'].forEach(function(id){document.getElementById(id).textContent='—';});
-      return;
-    }
-    banner.style.display='none';
-
-    var tCost=0,tDepr=0,tBook=0,tRepl=0;
-    var TD='padding:8px 14px;border-bottom:1px solid #E4E8F0;font-size:12.5px;';
-    var TDR=TD+'text-align:right;font-variant-numeric:tabular-nums;';
-
-    var rows=assets.map(function(a){
-      var d=calcDepr(a,p.sector);
-      var bv=calcBook(a,p.sector);
-      var repl=a.land?a.cost:a.cost*(p.rep/100);
-      tCost+=a.cost;tDepr+=d;tBook+=bv;tRepl+=repl;
-      var ul=getUL(a.cat,p.sector,a.land);
-      // 내용연수 표시
-      var ulStr;
-      if(a.land) ulStr='감가상각 없음';
-      else if(a.bio && a.fair) ulStr='<span style="color:#1D4ED8;font-size:10.5px;">공정가치(시장가) 기준</span>';
-      else if(a.bio) ulStr='생물자산 '+ul+'년 / '+Math.round((CY-a.acq))+'년 경과';
-      else ulStr=ul+'년 / '+(CY-a.acq)+'년 경과';
-      // 감가상각 표시
-      var deprStr;
-      if(a.land) deprStr='<span style="color:#9AA6BF;font-size:11px;">없음</span>';
-      else if(a.bio && a.fair) deprStr='<span style="color:#138A5A;font-size:10.5px;">—</span>';
-      else deprStr=fmt(d);
-      // 자산명에 생물자산 배지
-      var nameBadge=a.bio?'<span style="font-size:9.5px;background:#E6F4EE;color:#138A5A;padding:1px 5px;border-radius:10px;margin-left:4px;font-weight:600;">'+(a.fair?'공정가치':'생물자산')+'</span>':'';
-      return'<tr>'+
-        '<td style="'+TD+'font-weight:600;">'+a.name+nameBadge+'</td>'+
-        '<td style="'+TD+'color:#6B7894;">'+a.cat+'</td>'+
-        '<td style="'+TDR+'">'+fmt(a.cost)+'</td>'+
-        '<td style="'+TD+'color:#6B7894;font-size:11px;white-space:nowrap;">'+ulStr+'</td>'+
-        '<td style="'+TDR+'color:#6B7894;">'+deprStr+'</td>'+
-        '<td style="'+TDR+(bv<=0?'color:#B0382F;':' font-weight:600;')+'">'+fmt(bv)+'</td>'+
-        '<td style="'+TD+'font-size:11px;color:#1D4ED8;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+a.src+'">'+a.src+'</td>'+
-        '<td style="'+TD+'text-align:center;"><button onclick="removeAsset('+a.id+')" style="background:none;border:none;cursor:pointer;color:#9AA6BF;font-size:13px;padding:2px 6px;border-radius:4px;" onmouseover="this.style.color=\'#B0382F\'" onmouseout="this.style.color=\'#9AA6BF\'">✕</button></td>'+
-        '</tr>';
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter"){inp.blur();}});
+  });
+  // 취득원가 인라인 편집
+  tbody.querySelectorAll(".rcost").forEach(function(inp){
+    inp.addEventListener("blur",function(){
+      var a=assets.find(x=>x.id===+inp.dataset.id);
+      var v=parseFloat(inp.value);
+      if(a&&!isNaN(v)&&v>=0){a.cost=v;renderAll();}
+      else if(a){inp.value=a.cost;}
     });
-    document.getElementById('tbl-body').innerHTML=rows.join('');
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter"){inp.blur();}});
+  });
+  // 취득연도 인라인 편집
+  tbody.querySelectorAll(".ryear").forEach(function(inp){
+    inp.addEventListener("blur",function(){
+      var a=assets.find(x=>x.id===+inp.dataset.id);
+      var v=parseInt(inp.value);
+      if(a&&!isNaN(v)&&v>=1990&&v<=CY){a.acq=v;renderAll();}
+      else if(a){inp.value=a.acq;}
+    });
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter"){inp.blur();}});
+  });
 
-    var navBase=tBook-p.debt;
-    var navLow=tBook*(p.liq/100)-p.debt;
-    var navHigh=tRepl-p.debt;
+  // 편집 모드 상태 유지
+  if(_editMode){ var t2=tbody.closest("table");if(t2)t2.classList.add("edit-mode"); }
 
-    document.getElementById('nav-low').textContent=fmt(navLow);
-    document.getElementById('nav-base').textContent=fmt(navBase);
-    document.getElementById('nav-high').textContent=fmt(navHigh);
+  var r=computeNAV();
+  if(tfoot)tfoot.innerHTML=
+    '<tr><td colspan="2" style="padding:9px 12px;background:var(--oc-surface-2);font-weight:800">합계</td>'+
+    '<td class="r" style="padding:9px 12px;background:var(--oc-surface-2);font-weight:800">'+fmt(r.tC)+'</td>'+
+    '<td colspan="2" style="background:var(--oc-surface-2)"></td>'+
+    '<td class="r" style="padding:9px 12px;background:var(--oc-surface-2);font-weight:800;color:var(--oc-fg-muted)">'+fmt(r.tC-r.tB)+'</td>'+
+    '<td class="r" style="padding:9px 12px;background:var(--oc-blue-tint);font-weight:800;color:var(--oc-navy)">'+fmt(r.tB)+'</td>'+
+    '<td colspan="2" style="background:var(--oc-surface-2)"></td></tr>'+
+    '<tr><td colspan="6" style="padding:8px 12px;font-size:12px;color:var(--oc-fg-muted)">−  총부채</td>'+
+    '<td class="r" style="padding:8px 12px;font-size:12px;color:var(--oc-fg-muted)">'+fmt(r.debt)+'</td><td colspan="2"></td></tr>'+
+    '<tr class="nav-row"><td colspan="6" style="padding:10px 12px;font-size:13px">= 순자산가치 NAV (Base)</td>'+
+    '<td class="r" style="padding:10px 12px;font-size:14px">'+fmt(r.base)+'</td><td colspan="2"></td></tr>';
+}
 
-    var TF='padding:8px 14px;border-top:1px solid #E4E8F0;font-size:12.5px;';
-    var TFR=TF+'text-align:right;font-variant-numeric:tabular-nums;';
-    document.getElementById('tbl-foot').innerHTML=
-      '<tr>'+
-        '<td style="'+TF+'font-weight:700;background:#F7F9FC;" colspan="2">합계</td>'+
-        '<td style="'+TFR+'font-weight:700;background:#F7F9FC;">'+fmt(tCost)+'</td>'+
-        '<td style="'+TF+'background:#F7F9FC;"></td>'+
-        '<td style="'+TFR+'color:#6B7894;background:#F7F9FC;">'+fmt(tDepr)+'</td>'+
-        '<td style="'+TFR+'font-weight:700;background:#DAE3F3;color:#002060;">'+fmt(tBook)+'</td>'+
-        '<td style="'+TF+'background:#F7F9FC;" colspan="2"></td>'+
-      '</tr>'+
-      '<tr>'+
-        '<td style="'+TF+'font-weight:800;background:#DAE3F3;color:#002060;font-size:13px;" colspan="5">= 순자산가치 NAV (Base)</td>'+
-        '<td style="'+TFR+'font-weight:800;background:#DAE3F3;color:#002060;font-size:13px;">'+fmt(navBase)+'</td>'+
-        '<td style="'+TF+'background:#DAE3F3;" colspan="2"></td>'+
-      '</tr>';
+// ── 카운트 업데이트 ──
+function renderCounts(){
+  var total=assets.length;
+  var el1=document.getElementById("assetCountBadge");
+  var el2=document.getElementById("assetCountPill");
+  var el3=document.getElementById("hd-asset");
+  if(el1)el1.textContent=total+"건";
+  if(el2)el2.textContent=total;
+  if(el3)el3.textContent=total;
 
-    document.getElementById('d-cost').textContent=fmt(tCost);
-    document.getElementById('d-depr').textContent=fmt(tDepr);
-    document.getElementById('d-book').textContent=fmt(tBook);
-    document.getElementById('d-debt').textContent=fmt(p.debt);
-    document.getElementById('d-nav').textContent=fmt(navBase);
+  var docCount=Object.values(DOC_STATUS).filter(s=>s.status!=="miss").length;
+  var el4=document.getElementById("docCountPill");
+  var el5=document.getElementById("hd-doc");
+  var el6=document.getElementById("coDocCount");
+  if(el4)el4.textContent=docCount;
+  if(el5)el5.textContent=docCount;
+  if(el6)el6.textContent=docCount+"건";
+}
 
-    var hasEst=assets.some(function(a){return a.src.includes('추정');});
-    var pill=document.getElementById('conf-pill');
-    var lbl=document.getElementById('conf-label');
-    if(hasEst){
-      pill.style.background='#FBEED0';pill.style.color='#B5780C';
+// ── NAV 업데이트 ──
+function renderNAV(){
+  var r=computeNAV();
+  document.getElementById("navLow").textContent=fmt(r.low);
+  document.getElementById("navBase").textContent=fmt(r.base);
+  document.getElementById("navHigh").textContent=fmt(r.high);
+  var ovNav=document.getElementById("ov-nav");
+  if(ovNav)ovNav.innerHTML=fmt(r.base)+'<small> 억원</small>';
+  var ovRange=document.getElementById("ov-nav-range");
+  if(ovRange)ovRange.textContent="Low "+fmt(r.low)+" – High "+fmt(r.high)+" 억원";
+  var confPill=document.getElementById("confPill");
+  if(confPill){
+    var hasManual=assets.some(a=>a.srcType==="manual");
+    confPill.style.background=hasManual?"var(--oc-warn-tint)":"var(--oc-success-tint)";
+    confPill.style.color=hasManual?"var(--oc-warn)":"var(--oc-success)";
+    confPill.textContent=hasManual?"수동 입력 포함":"DART 확인됨";
+  }
+  var ulNote=document.getElementById("ulNote");
+  if(ulNote){
+    var types=[...new Set(assets.map(a=>a.type))];
+    ulNote.textContent="기준 내용연수: "+types.map(t=>{var ul=getUL(t,null);return t+(ul===0?"(감가없음)":ul+"년");}).join(" · ");
+  }
+}
+
+// ── NAV 빌드업 업데이트 ──
+function renderBuildup(){
+  var r=computeNAV();
+  var depr=r.tC-r.tB;
+  function s(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  s("bu-cost",fmt(r.tC));
+  s("bu-depr",fmt(depr));
+  s("bu-book",fmt(r.tB));
+  s("bu-curr",fmt(r.curr));
+  s("bu-inv",fmt(r.inv));
+  s("bu-total",fmt(r.totalAdj));
+  s("bu-debt",fmt(r.debt));
+  s("bu-nav",fmt(r.base));
+}
+
+// ── 자산 구성 바 ──
+var COMPOSE_COLORS={"유형자산":"#1D4ED8","무형자산":"#7C3AED","생물자산":"#059669","투자부동산":"#D97706"};
+function renderComposeBar(){
+  var bar=document.getElementById("iwaComposeBar");
+  var leg=document.getElementById("iwaComposeLegend");
+  var sub=document.getElementById("iwaComposeSub");
+  if(!bar)return;
+  var totals={};
+  assets.forEach(function(a){
+    var cls=(ASSET_TYPES[a.type]||{cls:"유형자산"}).cls;
+    totals[cls]=(totals[cls]||0)+calcBook(a);
+  });
+  var total=Object.values(totals).reduce(function(s,v){return s+v;},0);
+  if(total<=0){bar.innerHTML='<div style="flex:1;background:var(--oc-surface-3);border-radius:7px"></div>';if(leg)leg.innerHTML="";if(sub)sub.textContent="자산 없음";return;}
+  bar.innerHTML=Object.keys(totals).map(function(cls){
+    var pct=Math.round(totals[cls]/total*100);
+    var col=COMPOSE_COLORS[cls]||"#64748B";
+    return '<div class="iwa-compose-strip__seg" style="flex:'+pct+';background:'+col+'" title="'+cls+' '+pct+'%"></div>';
+  }).join("");
+  if(leg)leg.innerHTML=Object.keys(totals).map(function(cls){
+    var pct=Math.round(totals[cls]/total*100);
+    var col=COMPOSE_COLORS[cls]||"#64748B";
+    return '<span class="iwa-compose-strip__item"><span class="iwa-compose-strip__dot" style="background:'+col+'"></span>'+cls+'<span class="iwa-compose-strip__val"> '+pct+'%</span></span>';
+  }).join("");
+  if(sub)sub.textContent="총 장부가치 "+fmt(total)+" 억원";
+}
+
+function renderAll(){
+  renderNAV();
+  renderBuildup();
+  renderComposeBar();
+  renderAssetTable();
+  renderDocTracker();
+  renderCounts();
+}
+
+// ── 기업 전환 ──
+function applyCompany(key){
+  var co=COMPANIES[key];if(!co)return;
+  curKey=key;
+  document.getElementById("coAva").textContent=co.ava;
+  document.getElementById("coAva").style.background=co.grad;
+  document.getElementById("coName").textContent=co.name;
+  document.getElementById("coType").textContent=co.type;
+  document.getElementById("crumbCo").textContent=co.name;
+  inDebt.value=co.defaultDebt; outDebt.textContent=co.defaultDebt;
+  inLiq.value=80; outLiq.textContent="80";
+  inRep.value=130; outRep.textContent="130";
+  assets=co.assets.map(a=>({id:nextId++,name:a.name,type:a.type,cost:a.cost,acq:a.acq,src:a.src,srcType:a.srcType||"dart",customUL:null}));
+  renderAll();
+  renderDocCards();
+  try{localStorage.setItem("biyard-co-v6",key);}catch(e){}
+}
+function switchCompany(key){
+  if(key===curKey)return;
+  var co=COMPANIES[key];if(!co)return;
+  loadingMsg.textContent="DART에서 "+co.name+" 데이터 불러오는 중…";
+  loadingOv.classList.add("show");
+  setTimeout(()=>{loadingOv.classList.remove("show");applyCompany(key);},1000);
+}
+
+// ── 스위처 ──
+var swDrop=document.getElementById("swDrop");
+function renderSwList(filter){
+  filter=(filter||"").toLowerCase();
+  document.getElementById("swList").innerHTML=CO_ORDER.map(function(k){
+    var co=COMPANIES[k];
+    if(filter&&co.name.toLowerCase().indexOf(filter)<0)return"";
+    return '<button class="sw-item'+(k===curKey?" active":"")+'" data-k="'+k+'">'+
+      '<span class="sw-dot" style="background:'+co.dot+'"></span>'+
+      '<div><div class="sw-name">'+co.name+'</div><div class="sw-biz">'+co.type+'</div></div>'+
+      (k===curKey?'<span style="color:var(--oc-blue);font-size:12px">✓</span>':'')+
+    '</button>';
+  }).join("");
+  document.querySelectorAll(".sw-item").forEach(b=>{b.onclick=()=>{closeSw();switchCompany(b.dataset.k);};});
+}
+function openSw(){swDrop.classList.add("open");renderSwList();document.getElementById("swSearch").focus();}
+function closeSw(){swDrop.classList.remove("open");document.getElementById("swSearch").value="";}
+document.getElementById("coBtn").onclick=e=>{e.stopPropagation();swDrop.classList.contains("open")?closeSw():openSw();};
+document.addEventListener("click",e=>{if(!swDrop.contains(e.target))closeSw();});
+document.getElementById("swSearch").addEventListener("input",function(){renderSwList(this.value);});
+
+// ── 탭 전환 ──
+document.querySelectorAll(".nav-t[data-view]").forEach(b=>{b.onclick=()=>go(b.dataset.view);});
+function go(v){
+  document.querySelectorAll(".nav-t[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  document.querySelectorAll(".view[data-view]").forEach(s=>s.classList.toggle("active",s.dataset.view===v));
+}
+window.go=go;
+
+// ── 슬라이더 ──
+inLiq.oninput=function(){outLiq.textContent=inLiq.value;renderNAV();renderBuildup();};
+inRep.oninput=function(){outRep.textContent=inRep.value;renderNAV();renderBuildup();};
+inDebt.oninput=function(){outDebt.textContent=inDebt.value;renderNAV();renderBuildup();};
+if(inCurr){inCurr.oninput=function(){if(outCurr)outCurr.textContent=inCurr.value;renderNAV();renderBuildup();};}
+if(inInv){inInv.oninput=function(){if(outInv)outInv.textContent=inInv.value;renderNAV();renderBuildup();};}
+document.getElementById("asmReset").onclick=function(){
+  inLiq.value=80;outLiq.textContent="80";
+  inRep.value=130;outRep.textContent="130";
+  inDebt.value=COMPANIES[curKey].defaultDebt;outDebt.textContent=inDebt.value;
+  if(inCurr){inCurr.value=32;if(outCurr)outCurr.textContent=32;}
+  if(inInv){inInv.value=8;if(outInv)outInv.textContent=8;}
+  renderNAV();renderBuildup();
+};
+
+// ── 모달 ──
+var modalOv=document.getElementById("modalOv");
+var mClass=document.getElementById("mClass");
+var mType=document.getElementById("mType");
+function updateMTypes(){
+  var list=(TYPES_BY_CLS[mClass.value]||[]);
+  mType.innerHTML=list.map(t=>'<option>'+t+'</option>').join("");
+}
+mClass.onchange=updateMTypes;
+function openModal(){
+  mClass.value="유형자산";updateMTypes();
+  ["mName","mCost","mYear","mUl"].forEach(id=>{document.getElementById(id).value="";});
+  document.getElementById("mSrc").value="";
+  modalOv.classList.add("show");
+}
+function closeModal(){modalOv.classList.remove("show");}
+document.getElementById("modalClose").onclick=closeModal;
+document.getElementById("modalCancel").onclick=closeModal;
+document.getElementById("btnAdd").onclick=openModal;
+modalOv.onclick=e=>{if(e.target===modalOv)closeModal();};
+document.getElementById("modalSave").onclick=function(){
+  var name=document.getElementById("mName").value.trim();
+  var cost=+document.getElementById("mCost").value;
+  var year=+document.getElementById("mYear").value;
+  if(!name||isNaN(cost)||isNaN(year)){toast("자산명·취득원가·취득연도는 필수입니다.");return;}
+  var ul=+document.getElementById("mUl").value;
+  assets.push({id:nextId++,name,type:mType.value,cost,acq:year,
+    src:document.getElementById("mSrc").value||"수동 입력",srcType:"manual",customUL:isNaN(ul)?null:ul});
+  closeModal();renderAll();
+};
+
+// ── 편집 모드 토글 ──
+var _editMode = false;
+var _snapAssets = null; // 취소 시 복원용 스냅샷
+(function setupEditMode(){
+  var editBtn = document.getElementById("assetEditBtn");
+  var cancelBtn = document.getElementById("assetCancelBtn");
+  var tbl = document.getElementById("assetTbody") && document.getElementById("assetTbody").closest("table");
+  if(!editBtn) return;
+
+  function getTable(){ return document.getElementById("assetTbody") && document.getElementById("assetTbody").closest("table"); }
+
+  editBtn.onclick = function(){
+    var addBtn = document.getElementById("btnAdd");
+    if(!_editMode){
+      // 편집 진입
+      _snapAssets = JSON.parse(JSON.stringify(assets));
+      _editMode = true;
+      var t = getTable(); if(t) t.classList.add("edit-mode");
+      editBtn.textContent = "✓ 저장";
+      editBtn.classList.add("btn--pri");
+      cancelBtn.style.display = "";
+      if(addBtn) addBtn.style.display = "";
     } else {
-      pill.style.background='#E6F4EE';pill.style.color='#138A5A';
+      // 저장 — 현재 상태 그대로 확정
+      _editMode = false;
+      var t = getTable(); if(t) t.classList.remove("edit-mode");
+      editBtn.textContent = "✏ 편집";
+      editBtn.classList.remove("btn--pri");
+      cancelBtn.style.display = "none";
+      if(addBtn) addBtn.style.display = "none";
+      renderAll();
+      toast("저장되었습니다.");
     }
-    lbl.textContent=hasEst?'일부 추정값 포함':'신뢰도 보통';
-  }
-
-  window.removeAsset=function(id){
-    assets=assets.filter(function(a){return a.id!==id;});
-    render();
   };
-
-  ['in-liq','in-rep','in-debt'].forEach(function(id){
-    document.getElementById(id).addEventListener('input',render);
-  });
-
-  var UL_FOOTER={
-    ship:'선박 20년 · 기자재 10년 · 토지 감가상각 없음',
-    realestate:'건물 40년 · 토지 감가상각 없음 · 시설물 15년',
-    software:'소프트웨어 5년 · 서버·인프라 5년 · 특허·IP 10년 · 사무용비품 5년',
-    poultry:'계사 건물 20년 · 토지 감가상각 없음 · 사육설비 10년 · 냉동냉장 10년 · 차량 5년<br><span style="color:#138A5A;font-weight:600;">🐔 생물자산</span> 산란계 2.5년 · 종계 1.5년 · 육계 공정가치(시장가) 기준',
-    renewable:'태양광 패널 25년 · 풍력터빈 25년 · ESS 배터리 10년 · 인버터 10년 · 송전설비 20년 · 토지 감가상각 없음',
+  cancelBtn.onclick = function(){
+    var addBtn = document.getElementById("btnAdd");
+    // 취소 — 스냅샷 복원
+    if(_snapAssets) assets = _snapAssets;
+    _editMode = false;
+    var t = getTable(); if(t) t.classList.remove("edit-mode");
+    editBtn.textContent = "✏ 편집";
+    editBtn.classList.remove("btn--pri");
+    cancelBtn.style.display = "none";
+    if(addBtn) addBtn.style.display = "none";
+    renderAll();
+    toast("편집이 취소되었습니다.");
   };
+})();
 
-  document.getElementById('in-sector').addEventListener('change',function(){
-    var sector=this.value;
-    var sample=SAMPLE_ASSETS[sector]||SAMPLE_ASSETS.ship;
-    assets=sample.map(function(a){return Object.assign({},a);});
-    nextId=assets.length+1;
-    var footer=document.getElementById('ul-footer');
-    if(footer)footer.innerHTML='<strong style="color:#6B7894;">적용 내용연수</strong><br>'+(UL_FOOTER[sector]||'');
-    render();
-  });
+// ── toast ──
+function toast(msg){
+  var el=document.getElementById("toastEl");
+  el.textContent=msg;el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2200);
+}
+window.toast=toast;
 
-  document.getElementById('reset-btn').addEventListener('click',function(){
-    document.getElementById('in-liq').value=DEFAULTS.liq;
-    document.getElementById('in-rep').value=DEFAULTS.rep;
-    document.getElementById('in-debt').value=DEFAULTS.debt;
-    document.getElementById('in-sector').value=DEFAULTS.sector;
-    render();
-  });
+// ── init ──
+var lastKey="co-a";
+try{var s=localStorage.getItem("biyard-co-v6");if(s&&COMPANIES[s])lastKey=s;}catch(e){}
+applyCompany(lastKey);
 
-  document.getElementById('add-btn').addEventListener('click',function(){
-    assets.push({id:nextId++,name:'새 자산 '+assets.length,cat:'기타유형',cost:10,acq:2022,land:false,src:'추정'});
-    render();
-  });
-
-  document.getElementById('demo-re').addEventListener('click',function(){
-    document.getElementById('in-sector').value='realestate';
-    document.getElementById('in-sector').dispatchEvent(new Event('change'));
-    document.getElementById('in-debt').value=60;
-    document.getElementById('in-liq').value=75;
-    document.getElementById('in-rep').value=140;
-    render();
-  });
-
-  document.getElementById('demo-clear').addEventListener('click',function(){
-    assets=[];render();
-  });
-
-  render();
 })();
 </script>
 </body>
